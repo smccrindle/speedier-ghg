@@ -1,0 +1,10 @@
+@charset "utf-8";
+
+:root {
+    font-family: sans-serif;
+}
+
+#assets fieldset {
+    display: flex;
+    justify-content: space-between;
+}

@@ -13,24 +13,53 @@ fetch('data.json')
     // Set canvas context
     const ctx = document.getElementById('myChart').getContext('2d');
 
+    // Set each dataset to visible by default
+    data.datasets.forEach(dataset => {
+      dataset.hidden = false; // Initialize hidden property to false
+    });
+
     // Create the chart with all datasets initially
     myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ghgData.labels,
-            datasets: ghgData.datasets
-        },
-        options: {
-            scales: {
-                x: {
-                    stacked: true,
-                },
-                y: {
-                    stacked: true
-                }
-            },
-            maintainAspectRatio: false
-        }
+      type: 'bar',
+      data: {
+          labels: ghgData.labels,
+          datasets: ghgData.datasets
+      },
+      options: {
+          scales: {
+              x: {
+                  stacked: true
+              },
+              y: {
+                  stacked: true,
+                  title: {
+                      display: true,
+                      text: "GHG Emissions Avoided (tonnes of CO2e)"
+                  }, // Add a comma here
+              }
+          },
+          plugins: {
+              legend: {
+                  onClick: (event, legendItem, legend) => {
+                      const index = legendItem.datasetIndex;
+                      const ci = legend.chart;
+                      ci.data.datasets[index].hidden = !ci.data.datasets[index].hidden;
+                      ci.update();
+                  },
+                  onHover: (event, legendItem, legend) => {
+                      legend.chart.canvas.style.cursor = 'pointer';
+                  },
+                  onLeave: (event, legendItem, legend) => {
+                      legend.chart.canvas.style.cursor = 'default';
+                  },
+                  labels: {
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  }
+              }
+          },
+          maintainAspectRatio: false
+      }
     });
   })
   .catch(error => {

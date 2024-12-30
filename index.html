@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GHG Dashboard | SPEEDIER</title>
+    <link href="css/styles.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <div>
-        <input type="checkbox" id="dataset1" checked> GBESS<br>
-        <input type="checkbox" id="dataset2" checked> RBESS<br>
-        <input type="checkbox" id="dataset3" checked> PV<br>
-        <input type="checkbox" id="dataset4" checked> HWT<br>
-        <input type="checkbox" id="dataset5" checked> DCFC<br>
-        <input type="checkbox" id="dataset6" checked> L2<br>
-    </div>
+    <section id="assets">
+        <fieldset>
+            <legend>Project Activity</legend>
+            <label><input type="checkbox" id="dataset1" checked> GBESS</label>
+            <label><input type="checkbox" id="dataset2" checked> RBESS</label>
+            <label><input type="checkbox" id="dataset3" checked> PV</label>
+            <label><input type="checkbox" id="dataset4" checked> HWT</label>
+            <label><input type="checkbox" id="dataset5" checked> DCFC</label>
+            <label><input type="checkbox" id="dataset6" checked> L2</label>
+        </fieldset>
+    </section>
     <div>
         <canvas id="myChart" width="800"></canvas>
     </div>
