@@ -66,6 +66,8 @@ fetch('data.json')
     console.error('Error fetching data:', error);
   });
 
+/* The following code works with the HTML checkboxes to control chart rendering
+
 // Get all checkboxes
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -81,3 +83,5 @@ function updateChartVisibility() {
   });
   myChart.update();
 }
+
+*/
