@@ -8,15 +8,9 @@ fetch('data.json')
   .then(response => response.json())
   .then(data => {
     // Process the fetched data here
-    console.log(data);
     ghgData = data;
     // Set canvas context
     const ctx = document.getElementById('myChart').getContext('2d');
-
-    // Set each dataset to visible by default
-    data.datasets.forEach(dataset => {
-      dataset.hidden = false; // Initialize hidden property to false
-    });
 
     // Create the chart with all datasets initially
     myChart = new Chart(ctx, {
@@ -85,3 +79,45 @@ function updateChartVisibility() {
 }
 
 */
+const monthSelect = document.getElementById('monthSelect');
+monthSelect.addEventListener('change', () => {
+    const selectedMonth = monthSelect.value;
+    const monthlyTotals = calculateMonthlyTotals(ghgData, selectedMonth);
+    console.log(monthlyTotals);
+    // Update your chart with the new monthlyTotals 
+    myChart.data = monthlyTotals; 
+    myChart.update(); 
+});
+
+const dateFilterSelect = document.getElementById('dateFilter');
+dateFilterSelect.addEventListener('change', (event) => {
+  let timeScale = event.target.value;
+  dateFilter(timeScale);
+});
+
+function calculateMonthlyTotals(data, month) {
+  const monthlyTotals = {
+    "datasets": []
+  };
+  // Only sum up the data for the selected month
+  data.datasets.forEach(dataset => {
+    let sum = 0;
+    dataset.data.forEach(point => {
+      if (point.x.substring(5, 7) === month) { 
+        sum += point.y; 
+      }
+    });
+    // Build out the new JSON object for the chart
+    monthlyTotals.datasets.push({
+      "label": dataset.label,
+      "data": [{ "x": month, "y": sum }], 
+      "backgroundColor": dataset.backgroundColor 
+    });
+  });
+  return monthlyTotals;
+}
+
+function dateFilter(timeScale) {
+  myChart.config.options.scales.x.time.unit = timeScale;
+  myChart.update;
+}
