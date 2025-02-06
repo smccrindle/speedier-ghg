@@ -7,6 +7,7 @@
     <link href="css/styles.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="js/speedier.js" defer></script>
 </head>
 <body>
     <!-- Example of HTML to control chart 
@@ -25,7 +26,7 @@
     <div>
         <canvas id="myChart" width="800"></canvas>
     </div>
-    <select id="monthSelect">
+    <!-- <select id="monthSelect">
         <option value="01">January</option>
         <option value="02" selected>February</option>
     </select>
@@ -34,8 +35,13 @@
         <option value="month">Month</option>
         <option value="day">Day</option>
         <option value="hour">Hour</option>
+    </select> -->
+
+    <input type="date" id="datePicker" value="2024-01-01" min="2024-01-01" max="2024-01-31">
+    <select id="monthSelect">
     </select>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/speedier.js" defer></script>
+    <select id="yearSelect">
+    </select>
+    <input type="month">
 </body>
 </html>
