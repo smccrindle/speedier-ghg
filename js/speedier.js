@@ -7,7 +7,7 @@ let currentMonth = 1;
 let currentDay = 5;
 
 // Collect interface control elements
-const previous = document.getElementById('previous');
+const prev = document.getElementById('prev');
 const prevNextLabel = document.getElementById('prevNextLabel');
 const next = document.getElementById('next');
 
@@ -16,7 +16,7 @@ const month = document.getElementById('month');
 const year = document.getElementById('year');
 const total = document.getElementById('total');
 
-// Event listeners for interface controls
+// Event listeners for day/month/year/total interface controls
 day.addEventListener('click', () => {
   let monthOfYear;
   let dayOfMonth;
@@ -36,6 +36,9 @@ month.addEventListener('click', () => {
   prevNextLabel.textContent = `${currentYear}-${monthOfYear}`;
   showMonth(monthOfYear);
 });
+
+// Event listeners for prev and next buttons
+
 
 // Get data from project activities
 fetch('2024-01.json') 
@@ -132,7 +135,8 @@ function showDay(dayOfMonth) {
       return `${ghgData.datasets[0].data[0].x.slice(0, 8)}${String(dayOfMonth).padStart(2, '0')} ${hour}:00:00`; //Hourly labels
   });
   myChart.data.datasets = dailyData;
-  currentView = 'day';
+  currentView = "day";
+  updatePrevNext(currentView);
   myChart.update();
 };
 
@@ -174,25 +178,69 @@ function showMonth(monthOfYear) {
 // Function to update the prev/next buttons
 function updatePrevNext(currentView) {
   // Re-enable the prev and next buttons in case they were disabled
-  previous.disabled = false;
+  prev.disabled = false;
   next.disabled = false;
+  // Remove event listeners for the prev and next buttons
+  next.removeEventListener("click");
+  prev.removeEventListener("click");
   switch (currentView) {
-    case 'total':
+    case "total":
       // The prev and next buttons are not needed
-      previous.disabled = true;
+      prev.disabled = true;
       next.disabled = true;
       break;
-    case 'year':
+    case "year":
       // Update event listeners for the prev and next buttons
       break;
-    case 'month':
+    case "month":
       // Update event listeners for the prev and next buttons
       break;
     case "day":
       // Update event listeners for the prev and next buttons
+      console.log("Day view");
+      // We need to know the number of days in the current month
+      let lastDayOfMonth = new Date(currentYear, currentMonth, 0);
+      let numDaysInMonth = lastDayOfMonth.getDate();
+      console.log(`Number of days in month ${currentMonth} is ${numDaysInMonth}`);
+      prev.addEventListener('click', () => {
+        currentDay--;
+        // if we are at the first day of the month, disable the prev button
+        if (currentDay < 1) {
+          prev.disabled = true;
+          currentDay = 1;
+        };
+        prevNextLabel.textContent = `${currentYear}-${currentMonth}-${currentDay}`;
+        showDay(currentDay);
+      });
+      next.addEventListener('click', () => {
+        currentDay++;
+        // if we are at the last day of the month, disable the next button
+        if (currentDay > numDaysInMonth) {
+          next.disabled = true;
+          currentDay = numDaysInMonth;
+        };
+        prevNextLabel.textContent = `${currentYear}-${currentMonth}-${currentDay}`;
+        showDay(currentDay);
+      });
       break;
     default:
       console.log("Invalid currentView");
       break;
   };
-}
+};
+
+// Function to calculate the number of days in a month
+// function daysInMonth(year, month) {
+//   // Month is 0-indexed (0 = January, 1 = February, etc.), so we add 1
+//   // to get the correct month number for the Date object.
+//   const monthIndex = month;
+
+//   // Create a new Date object for the first day of the NEXT month.
+//   // Setting the day to 0 effectively gives us the last day of the PREVIOUS month.
+//   const nextMonth = new Date(year, monthIndex, 0);
+
+//   // Get the day of the month for the last day of the previous month.
+//   console.log(`Num. of days in month ${month} is ${nextMonth.getDate()}`);
+//   return nextMonth.getDate();
+// };
+
