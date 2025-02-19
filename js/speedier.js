@@ -1,127 +1,44 @@
 // Initialize variables
 let ghgData;
 let myChart;
+let currentView = "total";
+let currentYear = 2024;
+let currentMonth = 1;
+let currentDay = 5;
 
-// Register the date adapter
-// myChart.register(ChartDateFns); // This line is crucial!
+// Collect interface control elements
+const previous = document.getElementById('previous');
+const prevNextLabel = document.getElementById('prevNextLabel');
+const next = document.getElementById('next');
 
-/* ---------- Start of datepicker attempt ----------*/
-const datePicker = document.getElementById('datePicker'); // Use datePicker ID
-const monthSelect = document.getElementById('monthSelect'); // Add a select for the month
-const yearSelect = document.getElementById('yearSelect'); // Add a select for the year
+const day = document.getElementById('day');
+const month = document.getElementById('month');
+const year = document.getElementById('year');
+const total = document.getElementById('total');
 
-// Populate month select
-const months = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"];
-months.forEach((month, index) => {
-const option = document.createElement('option');
-option.value = String(index + 1).padStart(2, '0'); // 01, 02, ..., 12
-option.text = month;
-monthSelect.appendChild(option);
+// Event listeners for interface controls
+day.addEventListener('click', () => {
+  let monthOfYear;
+  let dayOfMonth;
+  // We may need a leading zero for the month and/or day
+  monthOfYear = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+  dayOfMonth = currentDay < 10 ? `0${currentDay}` : `${currentDay}`;
+  // console.log(dayOfMonth);
+  prevNextLabel.textContent = `${currentYear}-${monthOfYear}-${dayOfMonth}`;
+  showDay(dayOfMonth);
 });
 
-// Populate year select (you might want to make this dynamic based on your data)
-const currentYear = new Date().getFullYear();
-for (let i = currentYear - 5; i <= currentYear + 5; i++) { // Example: 5 years back and 5 years forward
-const option = document.createElement('option');
-option.value = i;
-option.text = i;
-yearSelect.appendChild(option);
-}
-
-// Date picker event listener
-datePicker.addEventListener('change', () => {
-  const selectedDate = datePicker.value;
-  filterByDate(selectedDate);
+month.addEventListener('click', () => {
+  let monthOfYear;
+  // We may need a leading zero for the month
+  monthOfYear = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+  // console.log(monthOfYear);
+  prevNextLabel.textContent = `${currentYear}-${monthOfYear}`;
+  showMonth(monthOfYear);
 });
-// Event listener for month and year changes
-monthSelect.addEventListener('change', filterByMonth);
-yearSelect.addEventListener('change', filterByMonth);
-
-// Filter by date
-function filterByDate(date) {
-  const filteredData = {
-    datasets: []
-  };
-
-  ghgData.datasets.forEach(dataset => {
-    const filteredDatasetData = dataset.data.filter(point => point.x.startsWith(date));
-    filteredData.datasets.push({
-      label: dataset.label,
-      data: filteredDatasetData,
-      backgroundColor: dataset.backgroundColor
-    });
-  });
-
-  myChart.data = filteredData;
-  myChart.options.scales.x.title = {
-    display: true,
-    text: `Emissions for ${date}`
-  };
-  myChart.update();
-}
-
-// Filter by month
-function filterByMonth() {
-  const selectedMonth = monthSelect.value;
-  const selectedYear = yearSelect.value;
-
-  const filteredData = {
-    datasets: []
-  };
-
-  ghgData.datasets.forEach(dataset => {
-    const filteredDatasetData = dataset.data.filter(point => {
-      const pointDate = new Date(point.x);
-      const pointMonth = String(pointDate.getMonth() + 1).padStart(2, '0');
-      const pointYear = pointDate.getFullYear();
-      return pointMonth === selectedMonth && pointYear === parseInt(selectedYear);
-    });
-
-    // Group data by day of the month
-    const dailyData = {};
-    filteredDatasetData.forEach(point => {
-      const day = point.x.slice(8, 10); // Extract day (01, 02, ..., 31)
-      if (!dailyData[day]) {
-        dailyData[day] = [];
-      }
-      dailyData[day].push(point);
-    });
-
-    const aggregatedDailyData = Object.keys(dailyData).map(day => {
-      let sum = 0;
-      dailyData[day].forEach(point => {
-        sum += point.y;
-      });
-      return { x: `${selectedYear}-${selectedMonth}-${day}`, y: sum }; // Keep ISO 8601 format!!!
-    });
-
-    filteredData.datasets.push({
-        label: dataset.label,
-        data: aggregatedDailyData,
-        backgroundColor: dataset.backgroundColor
-      });
-  });
-
-  myChart.data = filteredData;
-  myChart.options.scales.x.title = {
-    display: true,
-    text: `Emissions for ${months[parseInt(selectedMonth) - 1]}, ${selectedYear} (Daily)`
-  };
-  myChart.options.scales.x.type = 'time';
-  myChart.options.scales.x.time = {
-      unit: 'day',
-      displayFormats: { // Format the date display
-        day: 'MMM DD' // Example: "Jan 20", "Feb 15", etc.
-      }
-  };
-  myChart.update();
-}
-
-/* ---------- End of datepicker attempt ----------*/
 
 // Get data from project activities
-fetch('data-hourly.json') 
+fetch('2024-01.json') 
   .then(response => response.json())
   .then(data => {
     // Process the fetched data here
@@ -146,7 +63,7 @@ fetch('data-hourly.json')
                   title: {
                       display: true,
                       text: "GHG Emissions Avoided (tonnes of CO2e)"
-                  }, // Add a comma here
+                  }
               }
           },
           plugins: {
@@ -172,94 +89,110 @@ fetch('data-hourly.json')
           maintainAspectRatio: false
       }
     });
-
-    /* ---------- Start of datepicker attempt ----------*/
-    const dates = new Set();
-    data.datasets.forEach(dataset => {
-      dataset.data.forEach(point => {
-        dates.add(point.x.slice(0, 10));
-      });
-    });
-
-    // Set the initial date of the date picker (optional but recommended)
-    if (dates.size > 0) {
-      const firstDate = Array.from(dates)[0];
-      datePicker.value = firstDate; // Set the initial value of the date picker
-      filterByDate(firstDate); // Filter and display the chart for the first date
-    }
-
-    // Set initial month/year selection (optional)
-    const firstPointDate = new Date(ghgData.datasets[0].data[0].x); // Get the first date
-    monthSelect.value = String(firstPointDate.getMonth() + 1).padStart(2, '0');
-    yearSelect.value = firstPointDate.getFullYear();
-    filterByMonth(); // Initial filter
-
-    /* ---------- End of datepicker attempt ----------*/
-
-
   })
   .catch(error => {
     console.error('Error fetching data:', error);
   });
 
-/* The following code works with the HTML checkboxes to control chart rendering
 
-// Get all checkboxes
-const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+// Function to show a single day, hour-by-hour
+function showDay(dayOfMonth) {
+  const dailyData = [];
 
-// Attach event listeners to all checkboxes
-checkboxes.forEach(checkbox => {
-  checkbox.addEventListener('change', updateChartVisibility);
-});
+  ghgData.datasets.forEach(dataset => {
+      const datasetDailyData = [];
+      const data = []; // Initialize data array
 
-// Function to update chart visibility based on checkbox
-function updateChartVisibility() { 
-  myChart.data.datasets.forEach((dataset, index) => {
-    dataset.hidden = !checkboxes[index].checked;
+      for (let i = 0; i < 24; i++) { // Iterate through all 24 hours
+          const hour = String(i).padStart(2, '0');
+          const expectedTime = `${ghgData.datasets[0].data[0].x.slice(0, 8)}${String(dayOfMonth).padStart(2, '0')} ${hour}:00:00`; // Construct the expected time string
+
+
+          const dataPoint = dataset.data.find(item => item.x === expectedTime);
+          data.push(dataPoint ? dataPoint.y : 0); // Use data or 0 if missing
+      }
+
+      dataset.data.forEach(item => {
+          const itemDay = parseInt(item.x.slice(8, 10));
+
+          if (itemDay === dayOfMonth) {
+              datasetDailyData.push(item);
+          }
+      });
+
+      dailyData.push({
+          label: dataset.label,
+          data: data, // Use the correctly aligned data array
+          backgroundColor: dataset.backgroundColor
+      });
   });
+
+  myChart.data.labels = Array.from({ length: 24 }, (_, i) => {
+      const hour = String(i).padStart(2, '0');
+      return `${ghgData.datasets[0].data[0].x.slice(0, 8)}${String(dayOfMonth).padStart(2, '0')} ${hour}:00:00`; //Hourly labels
+  });
+  myChart.data.datasets = dailyData;
+  currentView = 'day';
+  myChart.update();
+};
+
+
+// Function to show a single month, day-by-day
+function showMonth(monthOfYear) {
+  const dailyData = []; // Will hold aggregated data for all datasets
+  const allDailyTotals = {}; // Object to store daily totals for each dataset
+
+  ghgData.datasets.forEach(dataset => {
+      const dailyTotals = {}; // Daily totals for THIS dataset
+      dataset.data.forEach(item => {
+          const date = item.x.slice(0, 10);
+          if (!dailyTotals[date]) {
+              dailyTotals[date] = 0;
+          }
+          dailyTotals[date] += item.y;
+      });
+
+      // Store the daily totals for this dataset, keyed by dataset label
+      allDailyTotals[dataset.label] = dailyTotals;
+  });
+
+  // Create the chart data structure
+  myChart.data.labels = Object.keys(allDailyTotals[ghgData.datasets[0].label]); // Use the dates from the first dataset as labels
+  myChart.data.datasets = ghgData.datasets.map(dataset => {
+      const datasetDailyTotals = allDailyTotals[dataset.label];
+      const data = Object.keys(datasetDailyTotals).map(date => datasetDailyTotals[date]);
+      return {
+          label: dataset.label,
+          data: data,
+          backgroundColor: dataset.backgroundColor // Preserve original colors
+      };
+  });
+  currentView = 'month';
   myChart.update();
 }
 
-*/
-// const monthSelect = document.getElementById('monthSelect');
-// monthSelect.addEventListener('change', () => {
-//     const selectedMonth = monthSelect.value;
-//     const monthlyTotals = calculateMonthlyTotals(ghgData, selectedMonth);
-//     console.log(monthlyTotals);
-//     // Update your chart with the new monthlyTotals 
-//     myChart.data = monthlyTotals; 
-//     myChart.update(); 
-// });
-
-// const dateFilterSelect = document.getElementById('dateFilter');
-// dateFilterSelect.addEventListener('change', (event) => {
-//   let timeScale = event.target.value;
-//   dateFilter(timeScale);
-// });
-
-// function calculateMonthlyTotals(data, month) {
-//   const monthlyTotals = {
-//     "datasets": []
-//   };
-//   // Only sum up the data for the selected month
-//   data.datasets.forEach(dataset => {
-//     let sum = 0;
-//     dataset.data.forEach(point => {
-//       if (point.x.substring(5, 7) === month) { 
-//         sum += point.y; 
-//       }
-//     });
-//     // Build out the new JSON object for the chart
-//     monthlyTotals.datasets.push({
-//       "label": dataset.label,
-//       "data": [{ "x": month, "y": sum }], 
-//       "backgroundColor": dataset.backgroundColor 
-//     });
-//   });
-//   return monthlyTotals;
-// }
-
-// function dateFilter(timeScale) {
-//   myChart.config.options.scales.x.time.unit = timeScale;
-//   myChart.update;
-// }
+// Function to update the prev/next buttons
+function updatePrevNext(currentView) {
+  // Re-enable the prev and next buttons in case they were disabled
+  previous.disabled = false;
+  next.disabled = false;
+  switch (currentView) {
+    case 'total':
+      // The prev and next buttons are not needed
+      previous.disabled = true;
+      next.disabled = true;
+      break;
+    case 'year':
+      // Update event listeners for the prev and next buttons
+      break;
+    case 'month':
+      // Update event listeners for the prev and next buttons
+      break;
+    case "day":
+      // Update event listeners for the prev and next buttons
+      break;
+    default:
+      console.log("Invalid currentView");
+      break;
+  };
+}

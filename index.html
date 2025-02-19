@@ -10,38 +10,16 @@
     <script src="js/speedier.js" defer></script>
 </head>
 <body>
-    <!-- Example of HTML to control chart 
-    <section id="assets">
-        <fieldset>
-            <legend>Project Activity</legend>
-            <label><input type="checkbox" id="dataset1" checked> GBESS</label>
-            <label><input type="checkbox" id="dataset2" checked> RBESS</label>
-            <label><input type="checkbox" id="dataset3" checked> PV</label>
-            <label><input type="checkbox" id="dataset4" checked> HWT</label>
-            <label><input type="checkbox" id="dataset5" checked> DCFC</label>
-            <label><input type="checkbox" id="dataset6" checked> L2</label>
-        </fieldset>
-    </section>
-    -->
     <div>
-        <canvas id="myChart" width="800"></canvas>
+      <canvas id="myChart" width="800"></canvas>
     </div>
-    <!-- <select id="monthSelect">
-        <option value="01">January</option>
-        <option value="02" selected>February</option>
-    </select>
-    <select id="dateFilter">
-        <option value="year">Year</option>
-        <option value="month">Month</option>
-        <option value="day">Day</option>
-        <option value="hour">Hour</option>
-    </select> -->
-
-    <input type="date" id="datePicker" value="2024-01-01" min="2024-01-01" max="2024-01-31">
-    <select id="monthSelect">
-    </select>
-    <select id="yearSelect">
-    </select>
-    <input type="month">
+    <div id="dateControls">
+      <div id="prevNextButtons">
+        <button id="prev">Prev</button> <span id="prevNextLabel"></span> <button id="next">Next</button>
+      </div>
+      <div id="dateButtons">
+        <button id="day">Day</button> <button id="month">Month</button> <button id="year">Year</button> <button id="total">Total</button>
+      </div>
+    </div>
 </body>
 </html>
