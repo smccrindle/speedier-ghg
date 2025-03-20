@@ -29,6 +29,8 @@ const prevBtn = document.getElementById('prev');
 const prevNextLabel = document.getElementById('prevNextLabel');
 const nextBtn = document.getElementById('next');
 
+const diagnostics = document.getElementById('diagnostics');
+
 const dayBtn = document.getElementById('day');
 const monthBtn = document.getElementById('month');
 const yearBtn = document.getElementById('year');
@@ -40,11 +42,11 @@ const totalBtn = document.getElementById('total');
 
 // Event listeners for day/month/year/total interface controls
 dayBtn.addEventListener('click', () => {
-  showDay(currentDay);
+  showDay(currentYear, currentMonth, currentDay);
 });
 
 monthBtn.addEventListener('click', () => {
-  showMonth(currentMonth);
+  showMonth(currentYear, currentMonth);
 });
 
 yearBtn.addEventListener('click', () => {
@@ -61,7 +63,7 @@ nextBtn.addEventListener("click", updateNext);
 
 // Draw the initial chart
 newChart(jsonFileName);
-
+diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 
 /* FUNCTIONS
 ---------------------------------------------------------------------------------------------------- */
@@ -157,7 +159,7 @@ function newChart(jsonFileName) {
     .catch(error => {
       console.error(`Error fetching data for file: ${jsonFileName}`, error);
     });
-  console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+  diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 };
 
 // Function to show a single day, hour-by-hour
@@ -203,7 +205,9 @@ function showDay(year, month, day) {
       });
       myChart.data.datasets = dailyData;
       currentView = "day";
-      console.log(`currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+      diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
+      // Decide how to handle next/prev button availability
+
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       myChart.update();
       console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
@@ -254,8 +258,9 @@ function showMonth(year, month) {
       currentYear = year;
       currentMonth = month;
       currentDay = null;
+
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
-      console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+      diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
@@ -278,8 +283,12 @@ function showYear(year) {
       currentYear = year;
       currentMonth = null;
       currentDay = null;
+      // if the current year is 2021 (or earlier), disable the prev button
+      prev.disabled = (year <= 2021) ? true : false;
+      // if the current year is 2026 (or later), disable the next button
+      next.disabled = (year >= 2026) ? true : false;
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
-      console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+      diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
@@ -304,41 +313,58 @@ function showTotal() {
   currentYear = null;
   currentMonth = null;
   currentDay = null;
+  // No need for prev/next buttons
+  prev.disabled = true;
+  next.disabled = true;
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
-  console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+  diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 };
 
-// Function to update the prev/next buttons
+// Function to handle PREVIOUS view logic
 function updatePrev() {
-  // Re-enable the next and prev buttons in case they were disabled
+  // Re-enable the prev button in case it was disabled
   prev.disabled = false;
-  next.disabled = false;
   switch (currentView) {
     case "total":
-      // The prev and next buttons are not needed
+      // The prev button is not needed
       prev.disabled = true;
-      // Load the JSON for all time
-
-      // Generate a new chart
       break;
     case "year":
-      // We need to load the JSON for the previous year
-
-      // Generate a new chart
+      // If the current year is 2021, we can't go back
+      if (currentYear === 2021) {
+        prev.disabled = true;
+      } else {
+        showYear(currentYear - 1);
+      };
       break;
     case "month":
-      // We need to load the JSON for the previous month
-
-      // Generate a new chart
+      // If current month is January, then back to December of previous year  
+      if (currentMonth === 1) {
+        currentYear --;
+        currentMonth = 12;
+      } else {
+        currentMonth --;
+      };
+      showMonth(currentYear, currentMonth);      
       break;
     case "day":
-      currentDay--;
-      // if we are at the first day of the month, disable the prev button
-      if (currentDay <= 1) {
-        prev.disabled = true;
-        currentDay = 1;
+      // if current day is first day of the month, then back to the last day of the previous month
+      if (currentDay === 1) {
+        // if it is January, then decrement the year, and go to December 31
+        if (currentMonth === 1) {
+          currentYear --;
+          currentMonth = 12;
+          currentDay = 31;
+        } else {
+          // it is not January, so just go back a month
+          currentMonth --;
+          // Determine what the last day of the month is (subtracting one because JS dates are zero-indexed)
+          currentDay = daysInMonth(currentYear, currentMonth - 1);
+        };
+      } else {
+        currentDay --;
       };
-      showDay(currentDay);
+      showDay(currentYear, currentMonth, currentDay);
       break;
     default:
       console.log("Invalid currentView");
@@ -348,46 +374,48 @@ function updatePrev() {
 };
 
 function updateNext() {
-  // Re-enable the next and prev buttons in case they were disabled
-  prev.disabled = false;
+  // Re-enable the next button in case it was disabled
   next.disabled = false;
   switch (currentView) {
     case "total":
-      // The prev and next buttons are not needed
+      // The next button is not needed
       next.disabled = true;
       break;
     case "year":
-      // We need to load the JSON for the next year
-
-      // Generate a new chart
+      // If the current year is 2026, we can't go forward
+      if(currentYear === 2026) {
+        next.disabled = true;
+      } else {
+        showYear(currentYear + 1);
+      };
       break;
     case "month":
-      // We need to load the JSON for the next month
-      currentMonth++;
-      let newJsonFileName = `${String(currentYear)}-${String(currentMonth).padStart(2, '0')}.json`;
-      fetch(newJsonFileName)
-        .then(response => response.json())
-        .then(data => {
-          // Process the fetched data here
-          myChart.data = data;
-          myChart.update();
-          // This does not work right!
-          showMonth(currentMonth);
-        })
-        .catch(error => {
-          console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-        });
+      // If the current month is December, then on to January of the next year
+      if (currentMonth === 12) {
+        currentYear ++;
+        currentMonth = 1;
+      } else {
+        currentMonth ++;
+      };
+      showMonth(currentYear, currentMonth);
       break;
     case "day":
-      // We need to know the number of days in the current month
-      let numDaysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-      currentDay++;
-      // if we are at the last day of the month, disable the next button
-      if (currentDay >= numDaysInMonth) {
-        next.disabled = true;
-        currentDay = numDaysInMonth;
+      // If current day is the last day of the month, then on to the first day of the next month
+      let lastDay = isLastDayOfMonth(currentYear, currentMonth + 1, currentDay);
+      if (lastDay) {
+        // If it is December 31, go to January
+        if (currentMonth === 12) {
+          currentMonth = 1;
+        } else {
+          currentMonth ++;
+        };
+        // We are now at the first of the month
+        currentDay = 1;
+      } else {
+        // It is some other day of the month, so on the the next day
+        currentDay ++;
       };
-      showDay(currentDay);
+      showDay(currentYear, currentMonth, currentDay);
       break;
     default:
       console.log("Invalid currentView");
@@ -418,3 +446,14 @@ function updatePrevNextLabel(year, month, day) {
       break;
   };
 };
+
+// Find the number of days in a specific month (thanks to https://stackoverflow.com/questions/1184334/get-number-days-in-a-specified-month-using-javascript)
+function daysInMonth (year, month) {
+  return new Date(parseInt(year), parseInt(month) + 1, 0).getDate();
+}
+
+// Determine whether a particular day represents the last day of a given month (thanks to Gemini for this one) - remember the month in JS is zero-indexed
+function isLastDayOfMonth(year, month, day) {
+  const nextDay = new Date(year, month, day + 1); // Create date object for the next day
+  return nextDay.getDate() === 1; // Check if the next day is the 1st of the next month
+}
