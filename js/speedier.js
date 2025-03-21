@@ -70,7 +70,7 @@ diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b>
 
 // Main chart drawing function
 function newChart(jsonFileName) {
-  // Grab current year and (possibly) month from JSON filename
+  // Grab current year and month from JSON filename
   currentYear = Number(jsonFileName.substring(0, 4));
   currentMonth = Number(jsonFileName.substring(6, 8));
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
@@ -118,8 +118,23 @@ function newChart(jsonFileName) {
               },
               labels: {
                 usePointStyle: true,
-                pointStyle: 'circle'
+                pointStyle: 'circle', // Keep the pointStyle, but we'll override the label
+                generateLabels: (chart) => {
+                  const original = Chart.defaults.plugins.legend.labels.generateLabels;
+                  const labels = original(chart);
+                  labels.forEach(label => {
+                    const dataset = chart.data.datasets[label.datasetIndex];
+                    const isHidden = dataset.hidden;
+                    label.text = (isHidden ? '\u2610 ' : '\u2611 ') + label.text; // Use unchecked and checked box unicode characters
+                    label.fontColor = isHidden? '#666': '#000';
+                  });
+                  return labels;
+                }
               }
+              // labels: {
+              //   usePointStyle: true,
+              //   pointStyle: 'circle'
+              // }
             }
           },
           onClick: (event, elements) => {
@@ -170,6 +185,9 @@ function showDay(year, month, day) {
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
+      // **Update ghgData here with the newly fetched data**
+      ghgData = data;
+
       const dailyData = [];
       ghgData.datasets.forEach(dataset => {
         const datasetDailyData = [];
@@ -197,7 +215,7 @@ function showDay(year, month, day) {
         });
         //console.log(dailyData);
       });
-      // TODO: We somehow need to update the chart so that there is no mouse pointer over the bars - you can't drill down any further
+      // TO DO: We somehow need to update the chart so that there is no mouse pointer over the bars - you can't drill down any further
 
       myChart.data.labels = Array.from({ length: 24 }, (_, i) => {
         const hour = String(i).padStart(2, '0');
@@ -206,7 +224,7 @@ function showDay(year, month, day) {
       myChart.data.datasets = dailyData;
       currentView = "day";
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
-      // Decide how to handle next/prev button availability
+      // TO DO: Decide how to handle next/prev button availability
 
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       myChart.update();
@@ -228,8 +246,6 @@ function showMonth(year, month) {
     .then(data => {
       // Replace ghgData with the newly fetched data
       ghgData = data;
-
-      const dailyData = [];
       const allDailyTotals = {};
       ghgData.datasets.forEach(dataset => {
         const dailyTotals = {};
