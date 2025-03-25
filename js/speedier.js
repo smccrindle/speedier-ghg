@@ -412,7 +412,8 @@ function updateNext() {
       if(currentYear === 2026) {
         next.disabled = true;
       } else {
-        showYear(currentYear + 1);
+        currentYear ++;
+        showYear(currentYear);
       };
       break;
     case "month":
@@ -426,8 +427,9 @@ function updateNext() {
       showMonth(currentYear, currentMonth);
       break;
     case "day":
-      // If current day is the last day of the month, then on to the first day of the next month
-      let lastDay = isLastDayOfMonth(currentYear, currentMonth + 1, currentDay);
+      // If current day + 1 is the last day of the month, then on to the first day of the next month (currentMonth needs to be converted to month as zero-indexed for JS)
+      let lastDay = isLastDayOfMonth(currentYear, currentMonth - 1, currentDay);
+      console.log(`lastDay = ${lastDay} and currentMonth = ${currentMonth}`);
       if (lastDay) {
         // If it is December 31, go to January
         if (currentMonth === 12) {
@@ -438,7 +440,6 @@ function updateNext() {
         // We are now at the first of the month
         currentDay = 1;
       } else {
-        // It is some other day of the month, so on the the next day
         currentDay ++;
       };
       showDay(currentYear, currentMonth, currentDay);
