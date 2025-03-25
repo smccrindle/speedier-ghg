@@ -16,13 +16,13 @@ Generate JSON file for all time
 ---------------------------------------------------------------------------------------------------- */
 
 // Initialize variables
-let jsonFileName = "2024-01.json";
+let jsonFileName = "total.json";
 let ghgData;
 let myChart;
-let currentView = "month";
-let currentYear = 2024;
-let currentMonth = 1;
-let currentDay = 1; // Always start with day 1 when we initialize the dashboard
+let currentView = "total"; // Start with total view upon startup
+let currentYear = null;
+let currentMonth = null;
+let currentDay = null;
 
 // Collect interface control elements
 const prevBtn = document.getElementById('prev');
@@ -70,9 +70,9 @@ diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b>
 
 // Main chart drawing function
 function newChart(jsonFileName) {
-  // Grab current year and month from JSON filename
-  currentYear = Number(jsonFileName.substring(0, 4));
-  currentMonth = Number(jsonFileName.substring(6, 8));
+  // Grab current year and month from JSON filename (don't think I need to do this, actually)
+  // currentYear = Number(jsonFileName.substring(0, 4));
+  // currentMonth = Number(jsonFileName.substring(6, 8));
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
   fetch(jsonFileName)
     .then(response => response.json())
@@ -118,23 +118,8 @@ function newChart(jsonFileName) {
               },
               labels: {
                 usePointStyle: true,
-                pointStyle: 'circle', // Keep the pointStyle, but we'll override the label
-                generateLabels: (chart) => {
-                  const original = Chart.defaults.plugins.legend.labels.generateLabels;
-                  const labels = original(chart);
-                  labels.forEach(label => {
-                    const dataset = chart.data.datasets[label.datasetIndex];
-                    const isHidden = dataset.hidden;
-                    label.text = (isHidden ? '\u2610 ' : '\u2611 ') + label.text; // Use unchecked and checked box unicode characters
-                    label.fontColor = isHidden? '#666': '#000';
-                  });
-                  return labels;
-                }
+                pointStyle: 'circle'
               }
-              // labels: {
-              //   usePointStyle: true,
-              //   pointStyle: 'circle'
-              // }
             }
           },
           onClick: (event, elements) => {
@@ -170,6 +155,11 @@ function newChart(jsonFileName) {
           maintainAspectRatio: false
         }
       });
+      // Enable/disable appropriate buttons
+      dayBtn.disabled = true;
+      monthBtn.disabled = true;
+      yearBtn.disabled = true;
+      totalBtn.disabled = false;
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${jsonFileName}`, error);
@@ -224,8 +214,11 @@ function showDay(year, month, day) {
       myChart.data.datasets = dailyData;
       currentView = "day";
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
-      // TO DO: Decide how to handle next/prev button availability
-
+      // Enable/disable appropriate buttons
+      dayBtn.disabled = false;
+      monthBtn.disabled = false;
+      yearBtn.disabled = false;
+      totalBtn.disabled = false;
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       myChart.update();
       console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
@@ -274,7 +267,11 @@ function showMonth(year, month) {
       currentYear = year;
       currentMonth = month;
       currentDay = null;
-
+      // Enable/disable appropriate buttons
+      dayBtn.disabled = true;
+      monthBtn.disabled = false;
+      yearBtn.disabled = false;
+      totalBtn.disabled = false;
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
     })
@@ -299,6 +296,11 @@ function showYear(year) {
       currentYear = year;
       currentMonth = null;
       currentDay = null;
+      // Enable/disable appropriate buttons
+      dayBtn.disabled = true;
+      monthBtn.disabled = true;
+      yearBtn.disabled = false;
+      totalBtn.disabled = false;
       // if the current year is 2021 (or earlier), disable the prev button
       prev.disabled = (year <= 2021) ? true : false;
       // if the current year is 2026 (or later), disable the next button
@@ -329,9 +331,13 @@ function showTotal() {
   currentYear = null;
   currentMonth = null;
   currentDay = null;
-  // No need for prev/next buttons
+  // Enable/disable appropriate buttons
   prev.disabled = true;
   next.disabled = true;
+  dayBtn.disabled = true;
+  monthBtn.disabled = true;
+  yearBtn.disabled = true;
+  totalBtn.disabled = false;
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
   diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 };
