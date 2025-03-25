@@ -169,8 +169,8 @@ function newChart(jsonFileName) {
 
 // Function to show a single day, hour-by-hour
 function showDay(year, month, day) {
-  month = String(month).padStart(2, '0');
-  let newJsonFileName = `${year}-${month}.json`;
+  let monthLeadingZero = String(month).padStart(2, '0');
+  let newJsonFileName = `${year}-${monthLeadingZero}.json`;
   console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
@@ -224,14 +224,15 @@ function showDay(year, month, day) {
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
+      alert(`No data available yet for: ${year}-${month}-${day}`);
     });
 };
 
 
 // Function to show a single month, day-by-day
 function showMonth(year, month) {
-  month = String(month).padStart(2, '0');
-  let newJsonFileName = `${year}-${month}.json`;
+  let monthLeadingZero = String(month).padStart(2, '0');
+  let newJsonFileName = `${year}-${monthLeadingZero}.json`;
   console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
@@ -276,6 +277,7 @@ function showMonth(year, month) {
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
+      alert(`No data available yet for: ${year}-${month}`);
     });
 }
 
@@ -309,6 +311,7 @@ function showYear(year) {
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
+      alert(`No data available yet for: ${year}`);
     });
 };
 
@@ -359,13 +362,14 @@ function updatePrev() {
       };
       break;
     case "month":
-      // If current month is January, then back to December of previous year  
+      // If current month is January, then back to December of previous year;
       if (currentMonth === 1) {
         currentYear --;
         currentMonth = 12;
       } else {
         currentMonth --;
       };
+      console.log(`currentYear = ${currentYear}, and currentMonth = ${currentMonth}!`);
       showMonth(currentYear, currentMonth);      
       break;
     case "day":
