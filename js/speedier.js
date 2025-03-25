@@ -205,7 +205,6 @@ function showDay(year, month, day) {
         });
         //console.log(dailyData);
       });
-      // TO DO: We somehow need to update the chart so that there is no mouse pointer over the bars - you can't drill down any further
 
       myChart.data.labels = Array.from({ length: 24 }, (_, i) => {
         const hour = String(i).padStart(2, '0');
