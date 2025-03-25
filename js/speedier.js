@@ -16,7 +16,7 @@ Generate JSON file for all time
 ---------------------------------------------------------------------------------------------------- */
 
 // Initialize variables
-let dataPath = "../data/";
+let dataPath = "data/";
 let jsonFileName = `${dataPath}total.json`;
 let ghgData;
 let myChart;
