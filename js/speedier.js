@@ -16,7 +16,8 @@ Generate JSON file for all time
 ---------------------------------------------------------------------------------------------------- */
 
 // Initialize variables
-let jsonFileName = "total.json";
+let dataPath = "../data/";
+let jsonFileName = `${dataPath}total.json`;
 let ghgData;
 let myChart;
 let currentView = "total"; // Start with total view upon startup
@@ -170,7 +171,7 @@ function newChart(jsonFileName) {
 // Function to show a single day, hour-by-hour
 function showDay(year, month, day) {
   let monthLeadingZero = String(month).padStart(2, '0');
-  let newJsonFileName = `${year}-${monthLeadingZero}.json`;
+  let newJsonFileName = `${dataPath}${year}-${monthLeadingZero}.json`;
   console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
@@ -232,7 +233,7 @@ function showDay(year, month, day) {
 // Function to show a single month, day-by-day
 function showMonth(year, month) {
   let monthLeadingZero = String(month).padStart(2, '0');
-  let newJsonFileName = `${year}-${monthLeadingZero}.json`;
+  let newJsonFileName = `${dataPath}${year}-${monthLeadingZero}.json`;
   console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
@@ -285,7 +286,7 @@ function showMonth(year, month) {
 // Function to show a single year, month-by-month
 function showYear(year) {
   // We need to load the JSON for the year
-  let newJsonFileName = `${year}.json`;
+  let newJsonFileName = `${dataPath}${year}.json`;
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
@@ -318,7 +319,7 @@ function showYear(year) {
 // Function to show all time
 function showTotal() {
   // We need to load the JSON for the year
-  let newJsonFileName = `total.json`;
+  let newJsonFileName = `${dataPath}total.json`;
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
