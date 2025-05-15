@@ -365,30 +365,30 @@ function updatePrev() {
     case "month":
       // If current month is January, then back to December of previous year;
       if (currentMonth === 1) {
-        currentYear --;
+        currentYear--;
         currentMonth = 12;
       } else {
-        currentMonth --;
+        currentMonth--;
       };
       console.log(`currentYear = ${currentYear}, and currentMonth = ${currentMonth}!`);
-      showMonth(currentYear, currentMonth);      
+      showMonth(currentYear, currentMonth);
       break;
     case "day":
       // if current day is first day of the month, then back to the last day of the previous month
       if (currentDay === 1) {
         // if it is January, then decrement the year, and go to December 31
         if (currentMonth === 1) {
-          currentYear --;
+          currentYear--;
           currentMonth = 12;
           currentDay = 31;
         } else {
           // it is not January, so just go back a month
-          currentMonth --;
+          currentMonth--;
           // Determine what the last day of the month is (subtracting one because JS dates are zero-indexed)
           currentDay = daysInMonth(currentYear, currentMonth - 1);
         };
       } else {
-        currentDay --;
+        currentDay--;
       };
       showDay(currentYear, currentMonth, currentDay);
       break;
@@ -409,20 +409,20 @@ function updateNext() {
       break;
     case "year":
       // If the current year is 2026, we can't go forward
-      if(currentYear === 2026) {
+      if (currentYear === 2026) {
         next.disabled = true;
       } else {
-        currentYear ++;
+        currentYear++;
         showYear(currentYear);
       };
       break;
     case "month":
       // If the current month is December, then on to January of the next year
       if (currentMonth === 12) {
-        currentYear ++;
+        currentYear++;
         currentMonth = 1;
       } else {
-        currentMonth ++;
+        currentMonth++;
       };
       showMonth(currentYear, currentMonth);
       break;
@@ -435,12 +435,12 @@ function updateNext() {
         if (currentMonth === 12) {
           currentMonth = 1;
         } else {
-          currentMonth ++;
+          currentMonth++;
         };
         // We are now at the first of the month
         currentDay = 1;
       } else {
-        currentDay ++;
+        currentDay++;
       };
       showDay(currentYear, currentMonth, currentDay);
       break;
@@ -475,7 +475,7 @@ function updatePrevNextLabel(year, month, day) {
 };
 
 // Find the number of days in a specific month (thanks to https://stackoverflow.com/questions/1184334/get-number-days-in-a-specified-month-using-javascript)
-function daysInMonth (year, month) {
+function daysInMonth(year, month) {
   return new Date(parseInt(year), parseInt(month) + 1, 0).getDate();
 }
 
