@@ -1,14 +1,14 @@
 /* TODO
 
-Generate JSON files with hourly data for each month
+JSON files with hourly data for each month
 - Name files in the format YYYY-MM.json
 - powers month and day views
 
-Generate JSON files with monthly data for each year
+JSON files with monthly data for each year
 - Name files in the format YYYY.json
 - powers year and total views
 
-Generate JSON file for all time
+JSON file for all time
 - Powers total view
 */
 
@@ -17,7 +17,7 @@ Generate JSON file for all time
 
 // Initialize variables
 let dataPath = "data/";
-let jsonFileName = `${dataPath}total.json`;
+let jsonFileName = `${dataPath}GHGIS-total.json`;
 let ghgData;
 let myChart;
 let currentView = "total"; // Start with total view upon startup
@@ -171,7 +171,7 @@ function newChart(jsonFileName) {
 // Function to show a single day, hour-by-hour
 function showDay(year, month, day) {
   let monthLeadingZero = String(month).padStart(2, '0');
-  let newJsonFileName = `${dataPath}${year}-${monthLeadingZero}.json`;
+  let newJsonFileName = `${dataPath}GHGIS-${year}-${monthLeadingZero}.json`;
   console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
@@ -233,7 +233,7 @@ function showDay(year, month, day) {
 // Function to show a single month, day-by-day
 function showMonth(year, month) {
   let monthLeadingZero = String(month).padStart(2, '0');
-  let newJsonFileName = `${dataPath}${year}-${monthLeadingZero}.json`;
+  let newJsonFileName = `${dataPath}GHGIS-${year}-${monthLeadingZero}.json`;
   console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
@@ -286,7 +286,7 @@ function showMonth(year, month) {
 // Function to show a single year, month-by-month
 function showYear(year) {
   // We need to load the JSON for the year
-  let newJsonFileName = `${dataPath}${year}.json`;
+  let newJsonFileName = `${dataPath}GHGIS-${year}.json`;
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
@@ -319,7 +319,7 @@ function showYear(year) {
 // Function to show all time
 function showTotal() {
   // We need to load the JSON for the year
-  let newJsonFileName = `${dataPath}total.json`;
+  let newJsonFileName = `${dataPath}GHGIS-total.json`;
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
