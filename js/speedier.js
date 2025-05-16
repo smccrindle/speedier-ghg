@@ -161,6 +161,8 @@ function newChart(jsonFileName) {
       monthBtn.disabled = true;
       yearBtn.disabled = true;
       totalBtn.disabled = false;
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${jsonFileName}`, error);
@@ -225,7 +227,26 @@ function showDay(year, month, day) {
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available yet for: ${year}-${month}-${day}`);
+      alert(`No data available yet for the DAY: ${year}-${month}-${day}`);
+      // We need to update the prevNextLabel to go back one day, because it was just advanced
+      // If this is the last day of the year, we need to account for that
+      console.warn(`day = ${day}, month = ${month}, year = ${year}`);
+      if (month === 12 & day === 31) {
+        // currentMonth goes back to 1, and currentDay goes back to 31
+        currentYear--;
+        currentMonth = 1;
+        currentDay = 31;
+        console.warn("We are on the last day of the year!");
+      // Else if this is the last day of the month, account for that
+      } else if (isLastDayOfMonth(year, month, day)) {
+        // Decrement currentMonth
+        currentMonth--;
+        // Find out how many days are in currentMonth, and set currentDay to that number
+        currentDay = daysInMonth(currentYear, currentMonth);
+        console.warn("We are on the last day of the month!");
+      };
+      console.log("We got here.");
+      updatePrevNextLabel(currentYear, currentMonth, currentDay);
     });
 };
 
@@ -279,6 +300,14 @@ function showMonth(year, month) {
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
       alert(`No data available yet for: ${year}-${month}`);
+      // We need to update the prevNextLabel to go back one month, because it was just advanced
+      if (month == 1) {
+        currentMonth = 12;
+        currentYear --;
+      } else {
+        currentMonth --;
+      }
+      updatePrevNextLabel(currentYear, currentMonth, null);
     });
 }
 
@@ -313,6 +342,9 @@ function showYear(year) {
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
       alert(`No data available yet for: ${year}`);
+      // We need to update the prevNextLabel to go back one year, because it was just advanced
+      currentYear --;
+      updatePrevNextLabel(currentYear, null, null);
     });
 };
 
@@ -431,9 +463,10 @@ function updateNext() {
       let lastDay = isLastDayOfMonth(currentYear, currentMonth - 1, currentDay);
       console.log(`lastDay = ${lastDay} and currentMonth = ${currentMonth}`);
       if (lastDay) {
-        // If it is December 31, go to January
+        // If it is December 31, go to January of next year
         if (currentMonth === 12) {
           currentMonth = 1;
+          currentYear++;
         } else {
           currentMonth++;
         };
