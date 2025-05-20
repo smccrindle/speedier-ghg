@@ -221,29 +221,43 @@ function showDay(year, month, day) {
       monthBtn.disabled = false;
       yearBtn.disabled = false;
       totalBtn.disabled = false;
+      // if we are displaying July 1, 2021, disable the prev button (we have no prior data)
+      console.warn(`year: ${year} month: ${month} day: ${day} evaluates to: ${isDateWithinRange(year, month, day)}`);
+      if (isDateBeforeRange(year, month, day) === true) {
+        prevBtn.disabled = false;
+      } else {
+        prevBtn.disabled = true;
+      };
+      // if we are displaying June 30, 2026, disable the next button (data collection ends on this date)
+      if (isDateAfterRange(year, month, day) === true) {
+        nextBtn.disabled = false;
+      } else {
+        nextBtn.disabled = true;
+      };
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       myChart.update();
-      console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+      // console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
       alert(`No data available yet for the DAY: ${year}-${month}-${day}`);
       // We need to update the prevNextLabel to go back one day, because it was just advanced
-      // If this is the last day of the year, we need to account for that
-      console.warn(`day = ${day}, month = ${month}, year = ${year}`);
-      if (month === 12 & day === 31) {
+      
+      // If this is the first day of the year, we need to roll back to December 31 of the previous year
+      // console.warn(`day = ${day}, month = ${month}, year = ${year}`);
+      if (month === 1 & day === 1) {
         // currentMonth goes back to 1, and currentDay goes back to 31
         currentYear--;
-        currentMonth = 1;
+        currentMonth = 12;
         currentDay = 31;
-        console.warn("We are on the last day of the year!");
-      // Else if this is the last day of the month, account for that
-      } else if (isLastDayOfMonth(year, month, day)) {
-        // Decrement currentMonth
+        // console.warn("We are on the first day of the year, but there is no data for this.");
+      // Else if this is the first day of the month, we need to roll back to the last day of the previous month
+      } else if (day === 1) {
+        // Decrement currentMonth isLastDayOfMonth(year, month, day)
         currentMonth--;
         // Find out how many days are in currentMonth, and set currentDay to that number
         currentDay = daysInMonth(currentYear, currentMonth);
-        console.warn("We are on the last day of the month!");
+        // console.warn("We are on the last day of the month!");
       };
       console.log("We got here.");
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
@@ -333,9 +347,9 @@ function showYear(year) {
       yearBtn.disabled = false;
       totalBtn.disabled = false;
       // if the current year is 2021 (or earlier), disable the prev button
-      prev.disabled = (year <= 2021) ? true : false;
+      prevBtn.disabled = (year <= 2021) ? true : false;
       // if the current year is 2026 (or later), disable the next button
-      next.disabled = (year >= 2026) ? true : false;
+      nextBtn.disabled = (year >= 2026) ? true : false;
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
     })
@@ -507,13 +521,31 @@ function updatePrevNextLabel(year, month, day) {
   };
 };
 
+
+
+
 // Find the number of days in a specific month (thanks to https://stackoverflow.com/questions/1184334/get-number-days-in-a-specified-month-using-javascript)
 function daysInMonth(year, month) {
   return new Date(parseInt(year), parseInt(month) + 1, 0).getDate();
-}
+};
 
 // Determine whether a particular day represents the last day of a given month (thanks to Gemini for this one) - remember the month in JS is zero-indexed
 function isLastDayOfMonth(year, month, day) {
   const nextDay = new Date(year, month, day + 1); // Create date object for the next day
   return nextDay.getDate() === 1; // Check if the next day is the 1st of the next month
-}
+};
+
+function isDateBeforeRange(year, month, day) {
+  // Function to see if the date being requested by the user is outside of the project range
+  // JavaScript Date months are 0-indexed (0 for Jan, 11 for Dec),
+  const viewedDate = new Date(year, month - 1, day);
+  const startBoundary = new Date(2021, 6, 1);
+  return viewedDate > startBoundary;
+};
+function isDateAfterRange(year, month, day) {
+  // Function to see if the date being requested by the user is outside of the project range
+  // JavaScript Date months are 0-indexed (0 for Jan, 11 for Dec),
+  const viewedDate = new Date(year, month - 1, day);
+  const endBoundary = new Date(2026, 5, 30);
+  return viewedDate < endBoundary;
+};
