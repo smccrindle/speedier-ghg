@@ -12,3 +12,7 @@
 #prevNextLabel {
     font-weight: bold;
 }
+
+button, input {
+    font-weight: bold;
+}

@@ -32,6 +32,7 @@ const nextBtn = document.getElementById('next');
 
 const diagnostics = document.getElementById('diagnostics');
 
+const datePicker = document.getElementById("date");
 const dayBtn = document.getElementById('day');
 const monthBtn = document.getElementById('month');
 const yearBtn = document.getElementById('year');
@@ -42,6 +43,34 @@ const totalBtn = document.getElementById('total');
 ---------------------------------------------------------------------------------------------------- */
 
 // Event listeners for day/month/year/total interface controls
+// Event listener for the date picker
+datePicker.addEventListener("change", () => {
+  const selectedDateString = datePicker.value; // Gets the date in 'YYYY-MM-DD' format
+
+  if (selectedDateString) { // Make sure a date was actually selected
+    // Parse the date string
+    const [year, month, day] = selectedDateString.split('-').map(Number);
+
+    // Call your showDay function
+    // Note: The 'month' obtained from split().map(Number) will be 1-indexed (e.g., 1 for January)
+    // which seems to be what your showDay function expects based on your padStart(2, '0') usage.
+    showDay(year, month, day);
+
+    // Optional: You might want to update currentYear, currentMonth, currentDay here
+    // to reflect the newly selected date for other button logic.
+    currentYear = year;
+    currentMonth = month;
+    currentDay = day;
+
+    // Optional: Update the prevNextLabel to reflect the new date
+    updatePrevNextLabel(currentYear, currentMonth, currentDay);
+
+  } else {
+    // Handle case where date is cleared or invalid
+    console.warn("No date selected or invalid date.");
+  }
+});
+
 dayBtn.addEventListener('click', () => {
   showDay(currentYear, currentMonth, currentDay);
 });
@@ -66,7 +95,7 @@ nextBtn.addEventListener("click", updateNext);
 newChart(jsonFileName);
 diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 
-/* FUNCTIONS
+/* PRIMARY FUNCTIONS
 ---------------------------------------------------------------------------------------------------- */
 
 // Main chart drawing function
@@ -126,7 +155,7 @@ function newChart(jsonFileName) {
           onClick: (event, elements) => {
             // Grab the x-axis label of the clicked element
             const xAxisLabel = myChart.data.labels[elements[0].index];
-            console.log('X-Axis Label:', xAxisLabel);
+            // console.log('X-Axis Label:', xAxisLabel);
             // Set the new year, month, and day values based on the clicked element
             currentYear = Number(xAxisLabel.substring(0, 4));
             currentMonth = Number(xAxisLabel.substring(5, 7));
@@ -151,7 +180,12 @@ function newChart(jsonFileName) {
             };
           },
           onHover: (event, chartElement) => {
-            event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            // If we are on the day view, hovering over a chart bar should not feature a mouse pointer - as the user cannot drill down any further
+            if (currentView === 'day') {
+              event.native.target.style.cursor = 'default';
+            } else {
+              event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            };
           },
           maintainAspectRatio: false
         }
@@ -163,9 +197,11 @@ function newChart(jsonFileName) {
       totalBtn.disabled = false;
       prevBtn.disabled = true;
       nextBtn.disabled = true;
+      updateDatePickerValue();
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${jsonFileName}`, error);
+      updateDatePickerValue();
     });
   diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 };
@@ -174,7 +210,7 @@ function newChart(jsonFileName) {
 function showDay(year, month, day) {
   let monthLeadingZero = String(month).padStart(2, '0');
   let newJsonFileName = `${dataPath}GHGIS-${year}-${monthLeadingZero}.json`;
-  console.log(`newJsonFileName: ${newJsonFileName}`);
+  // console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
@@ -222,7 +258,7 @@ function showDay(year, month, day) {
       yearBtn.disabled = false;
       totalBtn.disabled = false;
       // if we are displaying July 1, 2021, disable the prev button (we have no prior data)
-      console.warn(`year: ${year} month: ${month} day: ${day} evaluates to: ${isDateWithinRange(year, month, day)}`);
+      // console.warn(`year: ${year} month: ${month} day: ${day} evaluates to: ${isDateBeforeRange(year, month, day)}`);
       if (isDateBeforeRange(year, month, day) === true) {
         prevBtn.disabled = false;
       } else {
@@ -235,12 +271,13 @@ function showDay(year, month, day) {
         nextBtn.disabled = true;
       };
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
+      updateDatePickerValue();
       myChart.update();
       // console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available yet for the DAY: ${year}-${month}-${day}`);
+      alert(`No data available for the DAY: ${year}-${month}-${day}`);
       // We need to update the prevNextLabel to go back one day, because it was just advanced
       
       // If this is the first day of the year, we need to roll back to December 31 of the previous year
@@ -259,8 +296,8 @@ function showDay(year, month, day) {
         currentDay = daysInMonth(currentYear, currentMonth);
         // console.warn("We are on the last day of the month!");
       };
-      console.log("We got here.");
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
+      updateDatePickerValue();
     });
 };
 
@@ -269,7 +306,7 @@ function showDay(year, month, day) {
 function showMonth(year, month) {
   let monthLeadingZero = String(month).padStart(2, '0');
   let newJsonFileName = `${dataPath}GHGIS-${year}-${monthLeadingZero}.json`;
-  console.log(`newJsonFileName: ${newJsonFileName}`);
+  // console.log(`newJsonFileName: ${newJsonFileName}`);
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
@@ -309,11 +346,12 @@ function showMonth(year, month) {
       yearBtn.disabled = false;
       totalBtn.disabled = false;
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
+      updateDatePickerValue();
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available yet for: ${year}-${month}`);
+      alert(`No data available for the MONTH: ${year}-${month}`);
       // We need to update the prevNextLabel to go back one month, because it was just advanced
       if (month == 1) {
         currentMonth = 12;
@@ -322,6 +360,7 @@ function showMonth(year, month) {
         currentMonth --;
       }
       updatePrevNextLabel(currentYear, currentMonth, null);
+      updateDatePickerValue();
     });
 }
 
@@ -351,14 +390,16 @@ function showYear(year) {
       // if the current year is 2026 (or later), disable the next button
       nextBtn.disabled = (year >= 2026) ? true : false;
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
+      updateDatePickerValue();
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available yet for: ${year}`);
+      alert(`No data available for the YEAR: ${year}`);
       // We need to update the prevNextLabel to go back one year, because it was just advanced
       currentYear --;
       updatePrevNextLabel(currentYear, null, null);
+      updateDatePickerValue();
     });
 };
 
@@ -381,29 +422,30 @@ function showTotal() {
   currentMonth = null;
   currentDay = null;
   // Enable/disable appropriate buttons
-  prev.disabled = true;
-  next.disabled = true;
+  prevBtn.disabled = true;
+  nextBtn.disabled = true;
   dayBtn.disabled = true;
   monthBtn.disabled = true;
   yearBtn.disabled = true;
   totalBtn.disabled = false;
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
+  updateDatePickerValue();
   diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 };
 
 // Function to handle PREVIOUS view logic
 function updatePrev() {
-  // Re-enable the prev button in case it was disabled
-  prev.disabled = false;
+  // Re-enable the prevBtn button in case it was disabled
+  prevBtn.disabled = false;
   switch (currentView) {
     case "total":
-      // The prev button is not needed
-      prev.disabled = true;
+      // The prevBtn button is not needed
+      prevBtn.disabled = true;
       break;
     case "year":
       // If the current year is 2021, we can't go back
       if (currentYear === 2021) {
-        prev.disabled = true;
+        prevBtn.disabled = true;
       } else {
         showYear(currentYear - 1);
       };
@@ -416,7 +458,7 @@ function updatePrev() {
       } else {
         currentMonth--;
       };
-      console.log(`currentYear = ${currentYear}, and currentMonth = ${currentMonth}!`);
+      // console.log(`currentYear = ${currentYear}, and currentMonth = ${currentMonth}!`);
       showMonth(currentYear, currentMonth);
       break;
     case "day":
@@ -443,20 +485,21 @@ function updatePrev() {
       break;
   };
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
+  updateDatePickerValue();
 };
 
 function updateNext() {
-  // Re-enable the next button in case it was disabled
-  next.disabled = false;
+  // Re-enable the nextBtn button in case it was disabled
+  nextBtn.disabled = false;
   switch (currentView) {
     case "total":
-      // The next button is not needed
-      next.disabled = true;
+      // The nextBtn button is not needed
+      nextBtn.disabled = true;
       break;
     case "year":
       // If the current year is 2026, we can't go forward
       if (currentYear === 2026) {
-        next.disabled = true;
+        nextBtn.disabled = true;
       } else {
         currentYear++;
         showYear(currentYear);
@@ -475,7 +518,7 @@ function updateNext() {
     case "day":
       // If current day + 1 is the last day of the month, then on to the first day of the next month (currentMonth needs to be converted to month as zero-indexed for JS)
       let lastDay = isLastDayOfMonth(currentYear, currentMonth - 1, currentDay);
-      console.log(`lastDay = ${lastDay} and currentMonth = ${currentMonth}`);
+      // console.log(`lastDay = ${lastDay} and currentMonth = ${currentMonth}`);
       if (lastDay) {
         // If it is December 31, go to January of next year
         if (currentMonth === 12) {
@@ -496,6 +539,7 @@ function updateNext() {
       break;
   };
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
+  updateDatePickerValue();
 };
 
 function updatePrevNextLabel(year, month, day) {
@@ -522,7 +566,8 @@ function updatePrevNextLabel(year, month, day) {
 };
 
 
-
+/* UTILITY FUNCTIONS
+---------------------------------------------------------------------------------------------------- */
 
 // Find the number of days in a specific month (thanks to https://stackoverflow.com/questions/1184334/get-number-days-in-a-specified-month-using-javascript)
 function daysInMonth(year, month) {
@@ -542,10 +587,31 @@ function isDateBeforeRange(year, month, day) {
   const startBoundary = new Date(2021, 6, 1);
   return viewedDate > startBoundary;
 };
+
 function isDateAfterRange(year, month, day) {
   // Function to see if the date being requested by the user is outside of the project range
   // JavaScript Date months are 0-indexed (0 for Jan, 11 for Dec),
   const viewedDate = new Date(year, month - 1, day);
   const endBoundary = new Date(2026, 5, 30);
   return viewedDate < endBoundary;
+};
+
+function updateDatePickerValue() {
+  // Only update if currentYear, currentMonth, and currentDay are not null (i.e., not in 'total' view initially)
+  if (currentYear !== null && currentMonth !== null && currentDay !== null) {
+    // Ensure month and day have leading zeros if they are single digits
+    const formattedMonth = String(currentMonth).padStart(2, '0');
+    const formattedDay = String(currentDay).padStart(2, '0');
+
+    // Construct the date string in 'YYYY-MM-DD' format
+    const dateString = `${currentYear}-${formattedMonth}-${formattedDay}`;
+
+    // Set the value of the date input
+    datePicker.value = dateString;
+  } else {
+    // If in 'total' or other view where a specific day isn't selected,
+    // you might want to clear the date picker or set it to a default.
+    // For now, let's just clear it if not in a day/month/year view.
+    datePicker.value = '';
+  }
 };

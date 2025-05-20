@@ -17,11 +17,14 @@
   </div>
   <!-- Buttons for prev/next views, and also for day, month, year, and total (all time) -->
   <div id="dateControls">
+    <div id="datePicker">
+      <input type="date" id="date">
+    </div>
     <div id="prevNextButtons">
-      <button id="prev">Prev</button> <span id="prevNextLabel"></span> <button id="next">Next</button>
+      <button id="prev">&lt;</button> <span id="prevNextLabel"></span> <button id="next">&gt;</button>
     </div>
     <!-- Empty DIV for dumping variables for debugging -->
-    <div id="diagnostics" style="display: block;"></div>
+    <div id="diagnostics" style="display: none;"></div>
     <div id="dateButtons">
       <button id="day" style="display: none;">Day</button> <button id="month">Month</button> <button id="year">Year</button> <button id="total">Total</button>
     </div>
