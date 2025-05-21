@@ -24,6 +24,7 @@ let currentView = "total"; // Start with total view upon startup
 let currentYear = null;
 let currentMonth = null;
 let currentDay = null;
+let datasetVisibility = new Map(); // Stores { "AssetLabel": boolean (true for hidden, false for visible) }
 
 // Collect interface control elements
 const prevBtn = document.getElementById('prev');
@@ -137,7 +138,16 @@ function newChart(jsonFileName) {
               onClick: (event, legendItem, legend) => {
                 const index = legendItem.datasetIndex;
                 const ci = legend.chart;
+                // ci.data.datasets[index].hidden = !ci.data.datasets[index].hidden;
+                // ci.update();
+
+                // Toggle visibility in Chart.js data
                 ci.data.datasets[index].hidden = !ci.data.datasets[index].hidden;
+
+                // Update our persistent visibility map
+                // legendItem.text gives you the label of the clicked item
+                datasetVisibility.set(legendItem.text, ci.data.datasets[index].hidden);
+
                 ci.update();
               },
               onHover: (event, legendItem, legend) => {
@@ -250,6 +260,18 @@ function showDay(year, month, day) {
         return `${ghgData.datasets[0].data[0].x.slice(0, 8)}${String(day).padStart(2, '0')} ${hour}:00:00`; //Hourly labels
       });
       myChart.data.datasets = dailyData;
+
+      // Check to see what legend labels are enabled/disabled
+      myChart.data.datasets.forEach(dataset => {
+        if (datasetVisibility.has(dataset.label)) {
+          // If we have a stored state for this dataset, apply it
+          dataset.hidden = datasetVisibility.get(dataset.label);
+        } else {
+          // If no stored state (e.g., on first load), ensure it's visible by default
+          dataset.hidden = false;
+        }
+      });
+
       currentView = "day";
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
       // Enable/disable appropriate buttons
@@ -335,6 +357,16 @@ function showMonth(year, month) {
           backgroundColor: dataset.backgroundColor
         };
       });
+
+      // Check to see what legend labels are enabled/disabled
+      myChart.data.datasets.forEach(dataset => {
+        if (datasetVisibility.has(dataset.label)) {
+          dataset.hidden = datasetVisibility.get(dataset.label);
+        } else {
+          dataset.hidden = false;
+        }
+      });
+
       myChart.update();
       currentView = "month";
       currentYear = year;
@@ -374,6 +406,16 @@ function showYear(year) {
     .then(data => {
       // Process the fetched data here
       myChart.data = data;
+
+      // Check to see what legend labels are enabled/disabled
+      myChart.data.datasets.forEach(dataset => {
+        if (datasetVisibility.has(dataset.label)) {
+          dataset.hidden = datasetVisibility.get(dataset.label);
+        } else {
+          dataset.hidden = false;
+        }
+      });
+
       myChart.update();
       // Update global variables
       currentView = "year";
@@ -412,6 +454,16 @@ function showTotal() {
     .then(data => {
       // Process the fetched data here
       myChart.data = data;
+
+      // Check to see what legend labels are enabled/disabled
+      myChart.data.datasets.forEach(dataset => {
+        if (datasetVisibility.has(dataset.label)) {
+          dataset.hidden = datasetVisibility.get(dataset.label);
+        } else {
+          dataset.hidden = false;
+        }
+      });
+
       myChart.update();
     })
     .catch(error => {
@@ -606,12 +658,8 @@ function updateDatePickerValue() {
     // Construct the date string in 'YYYY-MM-DD' format
     const dateString = `${currentYear}-${formattedMonth}-${formattedDay}`;
 
-    // Set the value of the date input
     datePicker.value = dateString;
   } else {
-    // If in 'total' or other view where a specific day isn't selected,
-    // you might want to clear the date picker or set it to a default.
-    // For now, let's just clear it if not in a day/month/year view.
     datePicker.value = '';
   }
 };
