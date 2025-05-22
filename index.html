@@ -12,8 +12,14 @@
 </head>
 <body>
   <!-- Chart CANVAS element-->
-  <div id="chartContainer">
+  <div id="chart-container">
     <canvas id="myChart" width="800"></canvas>
+    <div id="chart-message" class="chart-message-overlay">
+      <div class="message-content-wrapper">
+          <p id="message-text"></p>
+          <button id="message-ok-btn">OK</button>
+      </div>
+    </div>
   </div>
   <!-- Buttons for prev/next views, and also for day, month, year, and total (all time) -->
   <div id="dateControls">

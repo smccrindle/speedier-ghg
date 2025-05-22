@@ -30,14 +30,15 @@ let datasetVisibility = new Map(); // Stores { "AssetLabel": boolean (true for h
 const prevBtn = document.getElementById('prev');
 const prevNextLabel = document.getElementById('prevNextLabel');
 const nextBtn = document.getElementById('next');
-
-const diagnostics = document.getElementById('diagnostics');
-
 const datePicker = document.getElementById("date");
-const dayBtn = document.getElementById('day');
+const dayBtn = document.getElementById('day'); // Not in use
 const monthBtn = document.getElementById('month');
 const yearBtn = document.getElementById('year');
 const totalBtn = document.getElementById('total');
+// Other interface elements
+const chartMessageOverlay = document.getElementById('chart-message');
+const messageTextElement = document.getElementById('message-text');
+const messageOkBtn = document.getElementById('message-ok-btn');
 
 
 /* EVENT LISTENERS
@@ -47,8 +48,6 @@ const totalBtn = document.getElementById('total');
 // Event listener for the date picker
 datePicker.addEventListener("change", async () => {
   const selectedDateString = datePicker.value; // Gets the date in 'YYYY-MM-DD' format
-
-  
   if (selectedDateString) { // Make sure a date was actually selected
     // Parse the date string
     const [year, month, day] = selectedDateString.split('-').map(Number);
@@ -68,24 +67,24 @@ datePicker.addEventListener("change", async () => {
       } else {
         // The date is within the project reporting range, but there is no data ready for this month, yet
         datePicker.value = "";
-        alert("No data is available yet for the selected date.");
+        showChartMessage("No data is available yet for the selected date.");
       };    
     } else {
       // User asked for date outside of reporting range
       datePicker.value = "";
-      alert("Selected date is outside of the reporting range for the project.");
+      showChartMessage("Selected date is outside of the reporting range for the project.");
     }
     updatePrevNextLabel(currentYear, currentMonth, currentDay);
   } else {
     // Handle case where date is cleared or invalid
     datePicker.value = "";
-    alert("No date selected or invalid date.");
+    showChartMessage("No date selected or invalid date.");
   }
 });
 
 dayBtn.addEventListener('click', () => {
   showDay(currentYear, currentMonth, currentDay);
-});
+}); // Not currently in use
 
 monthBtn.addEventListener('click', () => {
   showMonth(currentYear, currentMonth);
@@ -103,7 +102,12 @@ totalBtn.addEventListener('click', () => {
 prevBtn.addEventListener("click", updatePrev);
 nextBtn.addEventListener("click", updateNext);
 
-// Draw the initial chart
+messageOkBtn.addEventListener('click', () => {
+  hideChartMessage();
+});
+
+/* DRAW INITIAL CHART
+---------------------------------------------------------------------------------------------------- */
 newChart(jsonFileName);
 diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
 
@@ -223,6 +227,8 @@ function newChart(jsonFileName) {
       prevBtn.disabled = true;
       nextBtn.disabled = true;
       updateDatePickerValue();
+      // Clear out any error message
+      hideChartMessage();
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${jsonFileName}`, error);
@@ -296,13 +302,13 @@ function showDay(year, month, day) {
       totalBtn.disabled = false;
       // if we are displaying July 1, 2021, disable the prev button (we have no prior data)
       // console.warn(`year: ${year} month: ${month} day: ${day} evaluates to: ${isDateBeforeRange(year, month, day)}`);
-      if (isDateBeforeRange(year, month, day) === true) {
+      if (year === 2021 & month === 7 & day === 1) {
         prevBtn.disabled = true;
       } else {
         prevBtn.disabled = false;
       };
       // if we are displaying June 30, 2026, disable the next button (data collection ends on this date)
-      if (isDateAfterRange(year, month, day) === true) {
+      if (year === 2026 & month === 6 & day === 30) {
         nextBtn.disabled = true;
       } else {
         nextBtn.disabled = false;
@@ -311,10 +317,12 @@ function showDay(year, month, day) {
       updateDatePickerValue();
       myChart.update();
       // console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
+      // Clear out any error message
+      hideChartMessage();
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available for the DAY: ${year}-${month}-${day}`);
+      showChartMessage(`No data available for the DAY: ${year}-${month}-${day}`);
       // We need to update the prevNextLabel to go back one day, because it was just advanced
       
       // If this is the first day of the year, we need to roll back to December 31 of the previous year
@@ -410,10 +418,12 @@ function showMonth(year, month) {
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       updateDatePickerValue();
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
+      // Clear out any error message
+      hideChartMessage();
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available for the MONTH: ${year}-${month}`);
+      showChartMessage(`No data available for the MONTH: ${year}-${month}`);
       // We need to update the prevNextLabel to go forward one month, because it was just decreased, but that data for that month does not exist - nor will it ever
       // if the visitor is trying to view a month less than July 2021, then stop them
       if (year === 2021 & month === 6) {
@@ -461,7 +471,7 @@ function showYear(year) {
       // Enable/disable appropriate buttons
       dayBtn.disabled = true;
       monthBtn.disabled = true;
-      yearBtn.disabled = false;
+      yearBtn.disabled = true;
       totalBtn.disabled = false;
       // if the current year is 2021 (or earlier), disable the prev button
       prevBtn.disabled = (year <= 2021) ? true : false;
@@ -470,10 +480,12 @@ function showYear(year) {
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       updateDatePickerValue();
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
+      // Clear out any error message
+      hideChartMessage();
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
-      alert(`No data available for the YEAR: ${year}`);
+      showChartMessage(`No data available for the YEAR: ${year}`);
       // We need to update the prevNextLabel to go back one year, because it was just advanced
       currentYear --;
       updatePrevNextLabel(currentYear, null, null);
@@ -501,6 +513,8 @@ function showTotal() {
       });
 
       myChart.update();
+      // Clear out any error message
+      hideChartMessage();
     })
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
@@ -574,6 +588,8 @@ function updatePrev() {
   };
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
   updateDatePickerValue();
+  // Clear out any error message
+  hideChartMessage();
 };
 
 function updateNext() {
@@ -628,6 +644,8 @@ function updateNext() {
   };
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
   updateDatePickerValue();
+  // Clear out any error message
+  hideChartMessage();
 };
 
 function updatePrevNextLabel(year, month, day) {
@@ -648,7 +666,7 @@ function updatePrevNextLabel(year, month, day) {
       prevNextLabel.textContent = `${year}-${monthLeadingZero}-${dayLeadingZero}`;
       break;
     default:
-      alert("Invalid currentView: " + currentView);
+      console.warn("Invalid chart view mode: " + currentView);
       break;
   };
 };
@@ -693,7 +711,6 @@ function updateDatePickerValue() {
 
     // Construct the date string in 'YYYY-MM-DD' format
     const dateString = `${currentYear}-${formattedMonth}-${formattedDay}`;
-
     datePicker.value = dateString;
   } else {
     datePicker.value = '';
@@ -716,4 +733,15 @@ async function checkIfFileExists(filePath) {
       console.error(`Network or CORS error when checking for ${filePath}:`, error);
       return false; // Assume file doesn't exist or is inaccessible due to error
   }
+};
+
+function showChartMessage(message) {
+  messageTextElement.textContent = message;
+  chartMessageOverlay.classList.add('show');
+  // Optionally, focus the button for accessibility
+  messageOkBtn.focus();
+};
+
+function hideChartMessage() {
+  chartMessageOverlay.classList.remove('show');
 };
