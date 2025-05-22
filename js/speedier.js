@@ -45,30 +45,41 @@ const totalBtn = document.getElementById('total');
 
 // Event listeners for day/month/year/total interface controls
 // Event listener for the date picker
-datePicker.addEventListener("change", () => {
+datePicker.addEventListener("change", async () => {
   const selectedDateString = datePicker.value; // Gets the date in 'YYYY-MM-DD' format
 
+  
   if (selectedDateString) { // Make sure a date was actually selected
     // Parse the date string
     const [year, month, day] = selectedDateString.split('-').map(Number);
-
-    // Call your showDay function
-    // Note: The 'month' obtained from split().map(Number) will be 1-indexed (e.g., 1 for January)
-    // which seems to be what your showDay function expects based on your padStart(2, '0') usage.
-    showDay(year, month, day);
-
-    // Optional: You might want to update currentYear, currentMonth, currentDay here
-    // to reflect the newly selected date for other button logic.
-    currentYear = year;
-    currentMonth = month;
-    currentDay = day;
-
-    // Optional: Update the prevNextLabel to reflect the new date
+    console.log(`${year}-${month}-${day}: isDateBeforeRange = ${isDateBeforeRange(year, month, day)} and isDateAfterRange = ${isDateAfterRange(year, month, day)}`);
+    // We need to check here whether the selected date is within the acceptable range
+    if ((isDateBeforeRange(year, month, day) === false) & (isDateAfterRange(year, month, day) === false)) {
+      let possibleJsonFileName = `${dataPath}GHGIS-${year}-${String(month).padStart(2, '0')}.json`;
+      console.warn(`${possibleJsonFileName} exists: ${await checkIfFileExists(possibleJsonFileName)}`);
+      // if JSON file for requested year and month exists, proceed
+      if (await checkIfFileExists(possibleJsonFileName) === true) {
+        // We are good - there is data so let's go
+        showDay(year, month, day);
+        // Update the current date variables
+        currentYear = year;
+        currentMonth = month;
+        currentDay = day;
+      } else {
+        // The date is within the project reporting range, but there is no data ready for this month, yet
+        datePicker.value = "";
+        alert("No data is available yet for the selected date.");
+      };    
+    } else {
+      // User asked for date outside of reporting range
+      datePicker.value = "";
+      alert("Selected date is outside of the reporting range for the project.");
+    }
     updatePrevNextLabel(currentYear, currentMonth, currentDay);
-
   } else {
     // Handle case where date is cleared or invalid
-    console.warn("No date selected or invalid date.");
+    datePicker.value = "";
+    alert("No date selected or invalid date.");
   }
 });
 
@@ -130,6 +141,10 @@ function newChart(jsonFileName) {
               title: {
                 display: true,
                 text: "GHG Emissions Avoided (tonnes of CO2e)"
+              },
+              grid: {
+                // lineWidth: ({ tick }) => tick.value === 0 ? 2 : 1,
+                color: ({ tick }) => tick.value === 0 ? "rgba(0, 0, 0, 1)" : "rgba(0, 0, 0, 0.1)"
               }
             }
           },
@@ -282,15 +297,15 @@ function showDay(year, month, day) {
       // if we are displaying July 1, 2021, disable the prev button (we have no prior data)
       // console.warn(`year: ${year} month: ${month} day: ${day} evaluates to: ${isDateBeforeRange(year, month, day)}`);
       if (isDateBeforeRange(year, month, day) === true) {
-        prevBtn.disabled = false;
-      } else {
         prevBtn.disabled = true;
+      } else {
+        prevBtn.disabled = false;
       };
       // if we are displaying June 30, 2026, disable the next button (data collection ends on this date)
       if (isDateAfterRange(year, month, day) === true) {
-        nextBtn.disabled = false;
-      } else {
         nextBtn.disabled = true;
+      } else {
+        nextBtn.disabled = false;
       };
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       updateDatePickerValue();
@@ -372,11 +387,26 @@ function showMonth(year, month) {
       currentYear = year;
       currentMonth = month;
       currentDay = null;
+      
       // Enable/disable appropriate buttons
       dayBtn.disabled = true;
-      monthBtn.disabled = false;
+      monthBtn.disabled = true;
       yearBtn.disabled = false;
       totalBtn.disabled = false;
+
+      // if we are displaying July 2021, disable the prevBtn (we have no prior data)
+      // console.warn(`year: ${year} month: ${month} day: ${day} evaluates to: ${isDateBeforeRange(year, month, day)}`);
+      if (year === 2021 & month === 7) {
+        prevBtn.disabled = true;
+      } else {
+        prevBtn.disabled = false;
+      };
+      // if we are displaying June, 2026, disable the next button (data collection ends on this month)
+      if (year === 2026 & month === 6) {
+        nextBtn.disabled = true;
+      } else {
+        nextBtn.disabled = false;
+      };
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       updateDatePickerValue();
       diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
@@ -384,12 +414,18 @@ function showMonth(year, month) {
     .catch(error => {
       console.error(`Error fetching data for file: ${newJsonFileName}`, error);
       alert(`No data available for the MONTH: ${year}-${month}`);
-      // We need to update the prevNextLabel to go back one month, because it was just advanced
-      if (month == 1) {
-        currentMonth = 12;
-        currentYear --;
+      // We need to update the prevNextLabel to go forward one month, because it was just decreased, but that data for that month does not exist - nor will it ever
+      // if the visitor is trying to view a month less than July 2021, then stop them
+      if (year === 2021 & month === 6) {
+        currentMonth ++;
       } else {
-        currentMonth --;
+        // the visitor is trying to view a later month for which data is not available
+        if (month === 1) {
+          currentYear --;
+          currentMonth = 12;
+        } else {
+          currentMonth --;
+        }
       }
       updatePrevNextLabel(currentYear, currentMonth, null);
       updateDatePickerValue();
@@ -637,7 +673,7 @@ function isDateBeforeRange(year, month, day) {
   // JavaScript Date months are 0-indexed (0 for Jan, 11 for Dec),
   const viewedDate = new Date(year, month - 1, day);
   const startBoundary = new Date(2021, 6, 1);
-  return viewedDate > startBoundary;
+  return viewedDate < startBoundary;
 };
 
 function isDateAfterRange(year, month, day) {
@@ -645,7 +681,7 @@ function isDateAfterRange(year, month, day) {
   // JavaScript Date months are 0-indexed (0 for Jan, 11 for Dec),
   const viewedDate = new Date(year, month - 1, day);
   const endBoundary = new Date(2026, 5, 30);
-  return viewedDate < endBoundary;
+  return viewedDate > endBoundary;
 };
 
 function updateDatePickerValue() {
@@ -661,5 +697,23 @@ function updateDatePickerValue() {
     datePicker.value = dateString;
   } else {
     datePicker.value = '';
+  }
+};
+
+async function checkIfFileExists(filePath) {
+  try {
+      const response = await fetch(filePath, {
+          method: 'HEAD' // Use the HEAD method for efficiency
+      });
+
+      // response.ok is true for HTTP status codes in the 200-299 range
+      // This means the file was found successfully.
+      return response.ok;
+
+  } catch (error) {
+      // This catch block will handle network errors (e.g., server unreachable,
+      // no internet connection, CORS issues if the file is on a different domain without proper headers).
+      console.error(`Network or CORS error when checking for ${filePath}:`, error);
+      return false; // Assume file doesn't exist or is inaccessible due to error
   }
 };
