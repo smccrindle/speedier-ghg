@@ -12,7 +12,7 @@
 </head>
 <body>
   <!-- Chart CANVAS element-->
-  <div>
+  <div id="chartContainer">
     <canvas id="myChart" width="800"></canvas>
   </div>
   <!-- Buttons for prev/next views, and also for day, month, year, and total (all time) -->
@@ -21,7 +21,9 @@
       <input type="date" id="date">
     </div>
     <div id="prevNextButtons">
-      <button id="prev">&lt;</button> <span id="prevNextLabel"></span> <button id="next">&gt;</button>
+      <button id="prev">&#x2BC7;</button> 
+      <span id="prevNextLabel"></span> 
+      <button id="next">&#x2BC8;</button>
     </div>
     <!-- Empty DIV for dumping variables for debugging -->
     <div id="diagnostics" style="display: none;"></div>

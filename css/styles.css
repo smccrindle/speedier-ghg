@@ -5,14 +5,18 @@
 }
 
 #dateControls {
+    margin-top: 1rem;
     display: flex;
     justify-content: space-around;
-}
-
-#prevNextLabel {
     font-weight: bold;
 }
 
 button, input {
     font-weight: bold;
+    height: 1.25rem;
+}
+
+#prevNextButtons button {
+    font-size: 0.7rem;
+    height: 1.25rem;
 }
