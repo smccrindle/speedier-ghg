@@ -55,7 +55,7 @@ datePicker.addEventListener("change", async () => {
     // We need to check here whether the selected date is within the acceptable range
     if ((isDateBeforeRange(year, month, day) === false) & (isDateAfterRange(year, month, day) === false)) {
       let possibleJsonFileName = `${dataPath}GHGIS-${year}-${String(month).padStart(2, '0')}.json`;
-      console.warn(`${possibleJsonFileName} exists: ${await checkIfFileExists(possibleJsonFileName)}`);
+      // console.warn(`${possibleJsonFileName} exists: ${await checkIfFileExists(possibleJsonFileName)}`);
       // if JSON file for requested year and month exists, proceed
       if (await checkIfFileExists(possibleJsonFileName) === true) {
         // We are good - there is data so let's go
@@ -223,7 +223,7 @@ function newChart(jsonFileName) {
       dayBtn.disabled = true;
       monthBtn.disabled = true;
       yearBtn.disabled = true;
-      totalBtn.disabled = false;
+      totalBtn.disabled = true;
       prevBtn.disabled = true;
       nextBtn.disabled = true;
       updateDatePickerValue();
@@ -529,7 +529,7 @@ function showTotal() {
   dayBtn.disabled = true;
   monthBtn.disabled = true;
   yearBtn.disabled = true;
-  totalBtn.disabled = false;
+  totalBtn.disabled = true;
   updatePrevNextLabel(currentYear, currentMonth, currentDay);
   updateDatePickerValue();
   diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`;
