@@ -39,7 +39,7 @@ button, input {
 /* GHG Equivalents Info Panel */
 
 #ghgEquivalents {
-
+    font-size: 0.75rem;
 }
 #ghgEquivalents h3 {
     display: none;
@@ -51,10 +51,45 @@ button, input {
 #ghgEquivalents > data {
     font-size: 1.25rem;
 }
+#ghgEquivalents ul {
+    list-style-type: none;
+    padding: 0;
+}
+#ghgEquivalents li {
+    padding-left: 75px;
+    min-height: 52px;
+    margin-bottom: 0.5rem;
+}
 #ghgEquivalents li data {
     display: block;
-    font-size: 1.25rem;
     font-weight: bold;
+}
+#ghgEquivalents li p {
+    margin-top: 0;
+}
+#ghgEquivalents li:nth-of-type(1) {
+    background-image: url("../images/car.png");
+    background-repeat: no-repeat;
+}
+#ghgEquivalents li:nth-of-type(2) {
+    background-image: url("../images/gas-pump.png");
+    background-repeat: no-repeat;
+}
+#ghgEquivalents li:nth-of-type(3) {
+    background-image: url("../images/phone.png");
+    background-repeat: no-repeat;
+}
+#ghgEquivalents li:nth-of-type(4) {
+    background-image: url("../images/trash.png");
+    background-repeat: no-repeat;
+}
+#ghgEquivalents li:nth-of-type(5) {
+    background-image: url("../images/led.png");
+    background-repeat: no-repeat;
+}
+#ghgEquivalents li:nth-of-type(6) {
+    background-image: url("../images/tree.png");
+    background-repeat: no-repeat;
 }
 
 
