@@ -11,31 +11,73 @@
   <link rel="icon" href="images/cropped-s-mark-web-32x32.png" sizes="32x32">
 </head>
 <body>
-  <!-- Chart CANVAS element-->
-  <div id="chart-container">
-    <canvas id="myChart" width="800"></canvas>
-    <div id="chart-message" class="chart-message-overlay">
-      <div class="message-content-wrapper">
-          <p id="message-text"></p>
-          <button id="message-ok-btn">OK</button>
+
+  <div id="ghgDashboard">
+    <!-- Chart Panel -->
+    <section id="chartPanel">
+      <h3>SPEEDIER GHG Emissions Avoided</h3>
+      <div id="chartContainer">
+        <canvas id="myChart"></canvas>
       </div>
-    </div>
-  </div>
-  <!-- Buttons for prev/next views, and also for day, month, year, and total (all time) -->
-  <div id="dateControls">
-    <div id="datePicker">
-      <input type="date" id="date">
-    </div>
-    <div id="prevNextButtons">
-      <button id="prev">&#x2BC7;</button> 
-      <span id="prevNextLabel"></span> 
-      <button id="next">&#x2BC8;</button>
-    </div>
-    <!-- Empty DIV for dumping variables for debugging -->
-    <div id="diagnostics" style="display: none;"></div>
-    <div id="dateButtons">
-      <button id="day" style="display: none;">Day</button> <button id="month">Month</button> <button id="year">Year</button> <button id="total">Total</button>
-    </div>
-  </div>
+      <!-- Date Controls -->
+      <div id="dateControls">
+        <div id="datePicker">
+          <input type="date" id="date">
+        </div>
+        <div id="prevNextButtons">
+          <button id="prev">&#x2BC7;</button> 
+          <span id="prevNextLabel"></span> 
+          <button id="next">&#x2BC8;</button>
+        </div>
+        <!-- Empty DIV to output variables for debugging -->
+        <div id="diagnostics" style="display: none;"></div>
+        <div id="dateButtons">
+          <button id="day" style="display: none;">Day</button> <button id="month">Month</button> <button id="year">Year</button> <button id="total">Total</button>
+        </div>
+      </div><!-- #date-controls -->
+      <!-- Chart Error Message Overlay -->
+      <div id="chartMessage" class="chartMessageOverlay">
+        <div class="messageContentWrapper">
+            <p id="messageText"></p>
+            <button id="messageOkBtn">OK</button>
+        </div>
+      </div>
+    </section><!-- #chartContainer -->
+
+    <!-- GHG Equivalents Info Panel -->
+    <section id="ghgEquivalents">
+      <h3>GHG Equivalents Information</h3>
+      <h4>Total <abbr title="greenhouse gas">GHG</abbr> Reductions</h4>
+      <data value="">No data</data>
+      <h5>Monthly impact equivalent to*:</h5>
+      <ul>
+        <li>
+          <data value="">No data</data>
+          <p>not driven by an average passenger vehicle</p>
+        </li>
+        <li>
+          <data value="">No data</data>
+          <p>of gasoline not consumed</p>
+        </li>
+        <li>
+          <data value="">No data</data>
+          <p>complete daily phone charge cycles avoided</p>
+        </li>
+        <li>
+          <data value="">No data</data>
+          <p>trash bags of waste recycled instead of landfilled</p>
+        </li>
+        <li>
+          <data value="">No data</data>
+          <p>incandescent lamps switched to LEDs for one year</p>
+        </li>
+        <li>
+          <data value="">No data</data>
+          <p>tree seedlings grown for 10 years</p>
+        </li>
+      </ul>
+      <p><small>*Source: United States EPA. (October 15, 2018). Greenhouse Gas Equivalencies Calculator. Retrieved from https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator. Icons from https://www.flaticon.com.</small></p>
+    </section><!-- #ghg-equivalents -->
+  </div><!-- #ghgDashboard -->
 </body>
 </html>

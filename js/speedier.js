@@ -35,10 +35,21 @@ const dayBtn = document.getElementById('day'); // Not in use
 const monthBtn = document.getElementById('month');
 const yearBtn = document.getElementById('year');
 const totalBtn = document.getElementById('total');
+
+// GHG equivalents information panel
+const ghgEquivPanel = document.getElementById("ghgEquivalents");
+const ghgEquivTotal = document.querySelector("#ghgEquivalents > data");
+const ghgEquivCar = document.querySelector("#ghgEquivalents ul li:nth-of-type(1)");
+const ghgEquivGas = document.querySelector("#ghgEquivalents ul li:nth-of-type(2)");
+const ghgEquivPhone = document.querySelector("#ghgEquivalents ul li:nth-of-type(3)");
+const ghgEquivTrash = document.querySelector("#ghgEquivalents ul li:nth-of-type(4)");
+const ghgEquivLed = document.querySelector("#ghgEquivalents ul li:nth-of-type(5)");
+const ghgEquivTree = document.querySelector("#ghgEquivalents ul li:nth-of-type(6)");
+
 // Other interface elements
-const chartMessageOverlay = document.getElementById('chart-message');
-const messageTextElement = document.getElementById('message-text');
-const messageOkBtn = document.getElementById('message-ok-btn');
+const chartMessageOverlay = document.getElementById('chartMessage');
+const messageTextElement = document.getElementById('messageText');
+const messageOkBtn = document.getElementById('messageOkBtn');
 
 
 /* EVENT LISTENERS
@@ -168,6 +179,11 @@ function newChart(jsonFileName) {
                 datasetVisibility.set(legendItem.text, ci.data.datasets[index].hidden);
 
                 ci.update();
+
+                // Get GHG net totals for rendering GHG equivalents
+                const currentTotal = getChartTotalSum(myChart);
+                ghgEquivalent(currentTotal);
+
               },
               onHover: (event, legendItem, legend) => {
                 legend.chart.canvas.style.cursor = 'pointer';
@@ -219,6 +235,11 @@ function newChart(jsonFileName) {
           maintainAspectRatio: false
         }
       });
+
+      // Get GHG net totals for rendering GHG equivalents
+      const currentTotal = getChartTotalSum(myChart);
+      ghgEquivalent(currentTotal);
+
       // Enable/disable appropriate buttons
       dayBtn.disabled = true;
       monthBtn.disabled = true;
@@ -316,6 +337,11 @@ function showDay(year, month, day) {
       updatePrevNextLabel(currentYear, currentMonth, currentDay);
       updateDatePickerValue();
       myChart.update();
+
+      // Get GHG net totals for rendering GHG equivalents
+      const currentTotal = getChartTotalSum(myChart);
+      ghgEquivalent(currentTotal);
+
       // console.log(`currentView: ${currentView}, currentYear: ${currentYear}, currentMonth: ${currentMonth}, currentDay: ${currentDay}`);
       // Clear out any error message
       hideChartMessage();
@@ -391,6 +417,11 @@ function showMonth(year, month) {
       });
 
       myChart.update();
+
+      // Get GHG net totals for rendering GHG equivalents
+      const currentTotal = getChartTotalSum(myChart);
+      ghgEquivalent(currentTotal);
+
       currentView = "month";
       currentYear = year;
       currentMonth = month;
@@ -463,6 +494,11 @@ function showYear(year) {
       });
 
       myChart.update();
+
+      // Get GHG net totals for rendering GHG equivalents
+      const currentTotal = getChartTotalSum(myChart);
+      ghgEquivalent(currentTotal);
+
       // Update global variables
       currentView = "year";
       currentYear = year;
@@ -513,6 +549,11 @@ function showTotal() {
       });
 
       myChart.update();
+
+      // Get GHG net totals for rendering GHG equivalents
+      const currentTotal = getChartTotalSum(myChart);
+      ghgEquivalent(currentTotal);
+
       // Clear out any error message
       hideChartMessage();
     })
@@ -744,4 +785,65 @@ function showChartMessage(message) {
 
 function hideChartMessage() {
   chartMessageOverlay.classList.remove('show');
+};
+
+// This function calculates the total net sum of all 'y' values from visible datasets for the purposes of generating the GHG equivalents section of the interface
+function getChartTotalSum(chartInstance) {
+    if (!chartInstance || !chartInstance.data || !chartInstance.data.datasets) {
+        console.warn("Invalid Chart.js instance provided.");
+        return 0;
+    }
+
+    let totalSum = 0;
+
+    chartInstance.data.datasets.forEach(dataset => {
+        // Only sum data from datasets that are not hidden
+        if (!dataset.hidden) {
+            dataset.data.forEach(dataPoint => {
+                // Assuming dataPoint is { x: ..., y: value }
+                // Ensure 'y' is treated as a number
+                if (typeof dataPoint.y === 'number') {
+                    totalSum += dataPoint.y;
+                } else if (typeof dataPoint === 'number') {
+                    // Handle cases where data might be just an array of numbers [val1, val2, ...]
+                    totalSum += dataPoint;
+                }
+            });
+        }
+    });
+
+    return totalSum;
+};
+
+function ghgEquivalent(currentTotal) {
+  // The below factors are used for each project activity chart, in the generating of impact equivalencies for better comprehension of GHG mitigation benefits.
+  // *Source: United States EPA. (October 15, 2018). Greenhouse Gas Equivalencies Calculator. Retrieved on October 19, 2021 from https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator.	
+  const carUnitFactor = 0.000398;
+  const carConvFactor = 1.609; // Imperial to Metric conversion factor
+  const gasUnitFactor = 0.008887;
+  const gasConvFactor = 3.78541; // Imperial to Metric conversion factor
+  const phoneUnitFactor = 0.00000822;
+  const trashUnitFactor = 0.0235;
+  const ledUnitFactor = 0.0264;
+  const treeUnitFactor = 0.06;
+  // Determine the GHG equivalent based on the type of activity
+  ghgEquivTotal.innerHTML = `<data value="${currentTotal}">${currentTotal.toFixed(5)}</data> <abbr title="tonnes of carbon dioxide equivalent">tCO2<sub>e</sub></abbr>`;
+  // Car
+  let carEquivalent = (currentTotal / carUnitFactor) * carConvFactor;
+  ghgEquivCar.innerHTML = `<data value="${carEquivalent.toFixed(1)}">${carEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} km</data> not driven by an average passenger vehicle`;
+  // Gas
+  let gasEquivalent = (currentTotal / gasUnitFactor) * gasConvFactor;
+  ghgEquivGas.innerHTML = `<data value="${gasEquivalent.toFixed(1)}">${gasEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} L</data> of gasoline not consumed`;
+  // Phone
+  let phoneEquivalent = currentTotal / phoneUnitFactor;
+  ghgEquivPhone.innerHTML = `<data value="${phoneEquivalent.toFixed(1)}">${phoneEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</data> complete daily phone charge cycles avoided`;
+  // Trash
+  let trashEquivalent = currentTotal / trashUnitFactor;
+  ghgEquivTrash.innerHTML = `<data value="${trashEquivalent.toFixed(1)}">${trashEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</data> trash bags of waste recycled instead of landfilled`;
+  // LED
+  let ledEquivalent = currentTotal / ledUnitFactor;
+  ghgEquivLed.innerHTML = `<data value="${ledEquivalent.toFixed(1)}">${ledEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</data> incandescent lamps switched to LEDs for one year`;
+  // Tree
+  let treeEquivalent = currentTotal / treeUnitFactor;
+  ghgEquivTree.innerHTML = `<data value="${treeEquivalent.toFixed(1)}">${treeEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</data> tree seedlings grown for 10 years`;
 };

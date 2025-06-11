@@ -4,33 +4,90 @@
     font-family: sans-serif;
 }
 
+/* GHG Dashboard Layout */
+
+#ghgDashboard {
+    display: flex;
+    grid-template-columns: 100%;
+    grid-template-rows: 50vh min-content min-content;
+}
+
+@media screen and (width >= 768px) {
+    #ghgDashboard {
+        grid-template-columns: 60% 40%;
+        grid-template-rows: 60vh min-content;
+    }
+    #chartPanel {
+        grid-column-start: 1;
+        grid-column-end: 1;
+        grid-row-start: 1;
+        grid-row-end: 1;
+    }
+    #dateControls {
+        grid-column-start: 1;
+        grid-column-end: 1;
+        grid-row-start: 2;
+        grid-row-end: 2;
+    }
+    #ghgEquivalents {
+        grid-column-start: 2;
+        grid-column-end: 2;
+        grid-row-start: 1;
+        grid-row-end: 2;
+    }
+}
+
+/* Chart Panel */
+
+#chartPanel h3 {
+    display: none;
+}
+#chartContainer {
+    position: relative;
+    height: 50vh;
+}
+
+
+/* Date Controls */
+
 #dateControls {
     margin-top: 1rem;
     display: flex;
     justify-content: space-around;
     font-weight: bold;
 }
-
 button, input {
     font-weight: bold;
     height: 1.25rem;
 }
-
 #prevNextButtons button {
     font-size: 0.7rem;
     height: 1.25rem;
 }
 
-/* Add this to your existing CSS file or a <style> block */
 
-.chart-container {
-    position: relative;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+/* GHG Equivalents Info Panel */
+
+#ghgEquivalents h3 {
+    display: none;
+}
+#ghgEquivalents h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+#ghgEquivalents > data {
+    font-size: 1.25rem;
+}
+#ghgEquivalents li data {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: bold;
 }
 
-.chart-message-overlay {
+
+/* Chart Error Message Overlay */
+
+.chartMessageOverlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -50,12 +107,12 @@ button, input {
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.chart-message-overlay.show {
+.chartMessageOverlay.show {
     opacity: 1;
     visibility: visible;
 }
 
-.message-content-wrapper {
+.messageContentWrapper {
     padding: 2rem;
     border-radius: 0.5rem;
     background-color: white;
@@ -63,7 +120,7 @@ button, input {
     max-width: 80%; /* Prevent wrapper from being too wide */
 }
 
-#message-ok-btn {
+#messageOkBtn {
     width: auto;
     height: auto;
     padding: 0.2rem 0.5rem;
@@ -75,6 +132,6 @@ button, input {
     border-radius: 0.3rem;
 }
 
-#message-ok-btn:hover {
+#messageOkBtn:hover {
     background-color: #0056b3;
 }
