@@ -827,7 +827,7 @@ function ghgEquivalent(currentTotal) {
   const ledUnitFactor = 0.0264;
   const treeUnitFactor = 0.06;
   // Determine the GHG equivalent based on the type of activity
-  ghgEquivTotal.innerHTML = `<data value="${currentTotal}">${currentTotal.toFixed(5)}</data> <abbr title="tonnes of carbon dioxide equivalent">tCO2<sub>e</sub></abbr>`;
+  ghgEquivTotal.innerHTML = `<data value="${currentTotal}">${currentTotal.toFixed(5)}</data> tCO2<sub>e</sub>`;
   // Car
   let carEquivalent = (currentTotal / carUnitFactor) * carConvFactor;
   ghgEquivCar.innerHTML = `<data value="${carEquivalent.toFixed(1)}">${carEquivalent.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} km</data> not driven by an average passenger vehicle`;
