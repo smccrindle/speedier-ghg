@@ -195,18 +195,6 @@ function newChart(jsonFileName) {
                 usePointStyle: true,
                 pointStyle: 'circle'
               }
-            },
-            tooltip: {
-              callbacks: {
-                afterLabel: function(context) {
-                    const dataPoint = context.raw; // Get the original data point object
-
-                    if (dataPoint && dataPoint.comment) {
-                        return 'Note: ' + dataPoint.comment; // Return the comment text
-                    }
-                    return ''; // Return an empty string if no comment
-                }               
-              }
             }
           },
           onClick: (event, elements) => {
