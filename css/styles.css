@@ -40,7 +40,6 @@ button, input {
 
 #ghgEquivalents {
     font-size: 0.75rem;
-    padding-left: 1rem;
 }
 #ghgEquivalents h3 {
     display: none;
@@ -170,7 +169,7 @@ button, input {
     }
     #ghgEquivalents {
         width: 35%;
-        padding-left: 0.5rem;
+        padding-left: 1rem;
     }
     #ghgEquivalents h4 {
         margin-top: 0;
