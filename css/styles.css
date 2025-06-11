@@ -4,47 +4,17 @@
     font-family: sans-serif;
 }
 
-/* GHG Dashboard Layout */
-
-#ghgDashboard {
-    display: flex;
-    grid-template-columns: 100%;
-    grid-template-rows: 50vh min-content min-content;
-}
-
-@media screen and (width >= 768px) {
-    #ghgDashboard {
-        grid-template-columns: 60% 40%;
-        grid-template-rows: 60vh min-content;
-    }
-    #chartPanel {
-        grid-column-start: 1;
-        grid-column-end: 1;
-        grid-row-start: 1;
-        grid-row-end: 1;
-    }
-    #dateControls {
-        grid-column-start: 1;
-        grid-column-end: 1;
-        grid-row-start: 2;
-        grid-row-end: 2;
-    }
-    #ghgEquivalents {
-        grid-column-start: 2;
-        grid-column-end: 2;
-        grid-row-start: 1;
-        grid-row-end: 2;
-    }
-}
 
 /* Chart Panel */
+#chartPanel {
+    position: relative; /* for the error message overlay */
 
+}
 #chartPanel h3 {
     display: none;
 }
 #chartContainer {
-    position: relative;
-    height: 50vh;
+    height: 75%;
 }
 
 
@@ -68,6 +38,9 @@ button, input {
 
 /* GHG Equivalents Info Panel */
 
+#ghgEquivalents {
+
+}
 #ghgEquivalents h3 {
     display: none;
 }
@@ -134,4 +107,35 @@ button, input {
 
 #messageOkBtn:hover {
     background-color: #0056b3;
+}
+
+
+/* GHG Dashboard Responsive Layout */
+
+@media screen and (width >= 768px), (orientation: landscape) {
+    #ghgDashboard {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+    }
+    #chartPanel {
+        width: 65%;
+        display: flex;
+        flex-direction: column;
+    }
+    #chartContainer {
+        flex-basis: auto;
+        flex-grow: 3;
+    }
+    #dateControls {
+        flex-basis: auto;
+        flex-grow: 1;
+    }
+    #ghgEquivalents {
+        width: 35%;
+        padding-left: 0.5rem;
+    }
+    #ghgEquivalents h4 {
+        margin-top: 0;
+    }
 }
