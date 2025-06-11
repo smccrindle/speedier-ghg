@@ -23,7 +23,7 @@
 #dateControls {
     margin-top: 1rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     font-weight: bold;
 }
 button, input {
