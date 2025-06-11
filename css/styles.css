@@ -40,6 +40,7 @@ button, input {
 
 #ghgEquivalents {
     font-size: 0.75rem;
+    padding-left: 1rem;
 }
 #ghgEquivalents h3 {
     display: none;
