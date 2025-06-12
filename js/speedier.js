@@ -201,6 +201,15 @@ function newChart(jsonFileName) {
               intersect: true,
               callbacks: {
                 afterLabel: function(context) {
+                  // Debugging
+                  console.log("Tooltip context:", context);
+                  console.log("Raw data point (context.raw):", context.raw);
+                  if (context.raw && context.raw.comment) {
+                      console.log("Comment found:", context.raw.comment);
+                  } else {
+                      console.log("No comment or comment property missing.");
+                  };
+                  // End debugging
                   const dataPoint = context.raw; // This gets the original data point object ({x, y, comment})
                   if (dataPoint && dataPoint.comment) {
                       return 'Note: ' + dataPoint.comment; // Return the comment text
