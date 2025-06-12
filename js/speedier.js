@@ -201,20 +201,35 @@ function newChart(jsonFileName) {
               intersect: true,
               callbacks: {
                 afterLabel: function(context) {
-                  // Debugging
-                  console.log("Tooltip context:", context);
-                  console.log("Raw data point (context.raw):", context.raw);
-                  if (context.raw && context.raw.comment) {
-                      console.log("Comment found:", context.raw.comment);
-                  } else {
-                      console.log("No comment or comment property missing.");
-                  };
-                  // End debugging
-                  const dataPoint = context.raw; // This gets the original data point object ({x, y, comment})
-                  if (dataPoint && dataPoint.comment) {
-                      return 'Note: ' + dataPoint.comment; // Return the comment text
-                  }
-                  return ''; // Return an empty string if no comment for this data point
+
+                  console.log("--- DEBUGGING TOOLTIP COMMENT ---");
+                    console.log("Full context object:", context); // Inspect this thoroughly
+                    console.log("context.raw BEFORE IF:", context.raw); // This should be the full data point object
+                    console.log("Type of context.raw:", typeof context.raw);
+
+                    const dataPoint = context.raw;
+
+                    if (dataPoint) { // Check if dataPoint itself is valid/exists
+                        console.log("dataPoint exists.");
+                        console.log("Does dataPoint have a 'comment' property?", 'comment' in dataPoint); // Check for existence
+                        console.log("Value of dataPoint.comment:", dataPoint.comment); // Check its value
+                        console.log("Type of dataPoint.comment:", typeof dataPoint.comment);
+                        console.log("Is dataPoint.comment truthy (not null/undefined/empty string)?", !!dataPoint.comment);
+
+                        if (dataPoint.comment) { // Check if comment has a value
+                            console.log("Comment is truthy, will return:", 'Note: ' + dataPoint.comment);
+                            return 'Note: ' + dataPoint.comment;
+                        }
+                    }
+
+                    console.log("No comment or comment property missing (returning empty string).");
+                    return '';
+
+                  // const dataPoint = context.raw; // This gets the original data point object ({x, y, comment})
+                  // if (dataPoint && dataPoint.comment) {
+                  //     return 'Note: ' + dataPoint.comment; // Return the comment text
+                  // }
+                  // return ''; // Return an empty string if no comment for this data point
                 }
               }
             }
