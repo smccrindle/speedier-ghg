@@ -303,43 +303,41 @@ function showDay(year, month, day) {
   fetch(newJsonFileName)
     .then(response => response.json())
     .then(data => {
-      ghgData = data; // Keep this as is
+      // **Update ghgData here with the newly fetched data**
+      ghgData = data;
 
       const dailyData = [];
       ghgData.datasets.forEach(dataset => {
-        const fullHourlyDataPoints = []; // We will store full objects here
-        const expectedDatePrefix = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; // Pre-calculate date prefix for easier comparison
-
-        // Create a map for quick lookup of data points by their 'x' value for the current dataset
-        const dataPointMap = new Map(dataset.data.map(item => [item.x, item]));
+        const datasetDailyData = [];
+        const data = []; // Initialize data array
 
         for (let i = 0; i < 24; i++) { // Iterate through all 24 hours
           const hour = String(i).padStart(2, '0');
-          const expectedTime = `${expectedDatePrefix} ${hour}:00:00`;
+          const expectedTime = `${ghgData.datasets[0].data[0].x.slice(0, 8)}${String(day).padStart(2, '0')} ${hour}:00:00`; // Construct the expected time string
 
-          const dataPoint = dataPointMap.get(expectedTime); // Get the full object if it exists
-
-          if (dataPoint) {
-            fullHourlyDataPoints.push(dataPoint); // Push the original object including 'x', 'y', and 'comment'
-          } else {
-            // If no data for this hour, create a placeholder object
-            fullHourlyDataPoints.push({
-              x: expectedTime,
-              y: 0,
-              // No comment needed for zero/missing data points
-            });
-          }
+          const dataPoint = dataset.data.find(item => item.x === expectedTime);
+          data.push(dataPoint ? dataPoint.y : 0); // Use data or 0 if missing
         }
 
+        dataset.data.forEach(item => {
+          const itemDay = parseInt(item.x.slice(8, 10));
+          if (itemDay === day) {
+            datasetDailyData.push(item);
+          }
+        });
+        //console.log(datasetDailyData);
         dailyData.push({
           label: dataset.label,
-          data: fullHourlyDataPoints, // Assign the array of full objects
+          data: data, // Use the correctly aligned data array
           backgroundColor: dataset.backgroundColor
         });
+        //console.log(dailyData);
       });
 
-      // Update labels from the first dataset's new data (since it now contains x values)
-      myChart.data.labels = dailyData[0].data.map(item => item.x);
+      myChart.data.labels = Array.from({ length: 24 }, (_, i) => {
+        const hour = String(i).padStart(2, '0');
+        return `${ghgData.datasets[0].data[0].x.slice(0, 8)}${String(day).padStart(2, '0')} ${hour}:00:00`; //Hourly labels
+      });
       myChart.data.datasets = dailyData;
 
       // Check to see what legend labels are enabled/disabled
