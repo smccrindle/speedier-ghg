@@ -773,7 +773,7 @@ async function checkIfFileExists(filePath) {
 };
 
 
-// SHOW/HIDE CHART MESSAGE: Function to give user a friendly error message, and offer an "OK" button to dismiss it
+// SHOW/HIDE CHART MESSAGE: Functions to give user a friendly error message, and offer an "OK" button to dismiss it
 function showChartMessage(message) {
 	messageTextElement.textContent = message;
 	chartMessageOverlay.classList.add('show');
