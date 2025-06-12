@@ -195,6 +195,19 @@ function newChart(jsonFileName) {
                 usePointStyle: true,
                 pointStyle: 'circle'
               }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false, // These are common defaults
+              callbacks: {
+                afterLabel: function(context) {
+                  const dataPoint = context.raw; // This gets the original data point object ({x, y, comment})
+                  if (dataPoint && dataPoint.comment) {
+                      return 'Note: ' + dataPoint.comment; // Return the comment text
+                  }
+                  return ''; // Return an empty string if no comment for this data point
+                }
+              }
             }
           },
           onClick: (event, elements) => {
