@@ -261,7 +261,6 @@ function newChart(jsonFileName) {
 			ghgEquivalent(currentTotal);
 
 			// Enable/disable appropriate buttons
-			dayBtn.disabled = true;
 			monthBtn.disabled = true;
 			yearBtn.disabled = true;
 			totalBtn.disabled = true;
@@ -329,7 +328,6 @@ function showDay(year, month, day) {
 			currentView = "day";
 			diagnostics.innerHTML = `<b>currentView:</b> ${currentView}, <b>currentYear:</b> ${currentYear}, <b>currentMonth:</b> ${currentMonth}, <b>currentDay:</b> ${currentDay}`; // See HTML - this is set to display: none; with an inline style attribute so it can be easily made visible for debugging
 			// Enable/disable appropriate buttons
-			dayBtn.disabled = false;
 			monthBtn.disabled = false;
 			yearBtn.disabled = false;
 			totalBtn.disabled = false;
@@ -426,7 +424,6 @@ function showMonth(year, month) {
 			currentMonth = month;
 			currentDay = null;
 			// Enable/disable appropriate buttons
-			dayBtn.disabled = true;
 			monthBtn.disabled = true;
 			yearBtn.disabled = false;
 			totalBtn.disabled = false;
@@ -498,7 +495,6 @@ function showYear(year) {
 			currentMonth = null;
 			currentDay = null;
 			// Enable/disable appropriate buttons
-			dayBtn.disabled = true;
 			monthBtn.disabled = true;
 			yearBtn.disabled = true;
 			totalBtn.disabled = false;
@@ -559,7 +555,6 @@ function showTotal() {
 	// Enable/disable appropriate buttons
 	prevBtn.disabled = true;
 	nextBtn.disabled = true;
-	dayBtn.disabled = true;
 	monthBtn.disabled = true;
 	yearBtn.disabled = true;
 	totalBtn.disabled = true;
