@@ -197,8 +197,8 @@ function newChart(jsonFileName) {
               }
             },
             tooltip: {
-              mode: 'index',
-              intersect: false, // These are common defaults
+              mode: 'nearest',
+              intersect: true,
               callbacks: {
                 afterLabel: function(context) {
                   const dataPoint = context.raw; // This gets the original data point object ({x, y, comment})
