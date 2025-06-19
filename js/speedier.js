@@ -43,6 +43,13 @@ let currentYear = null;
 let currentMonth = null;
 let currentDay = null;
 let datasetVisibility = new Map(); // Stores { "AssetLabel": boolean (true for hidden, false for visible) }
+// Define number formatting presets for each view for Y-axis label and tooltips
+const formatPresets = {
+    "total": { min: 2, max: 3 },
+    "year":  { min: 3, max: 4 },
+    "month": { min: 4, max: 5 },
+    "day":   { min: 5, max: 8 }
+};
 
 // Collect interface control elements
 const prevBtn = document.getElementById('prev');
@@ -83,7 +90,6 @@ datePicker.addEventListener("change", async () => {
 		// We need to check here whether the selected date is within the acceptable range
 		if ((isDateBeforeRange(year, month, day) === false) & (isDateAfterRange(year, month, day) === false)) {
 			let possibleJsonFileName = `${dataPath}GHGIS-${year}-${String(month).padStart(2, '0')}.json`;
-			// console.warn(`${possibleJsonFileName} exists: ${await checkIfFileExists(possibleJsonFileName)}`);
 			// if JSON file for requested year and month exists, proceed
 			if (await checkIfFileExists(possibleJsonFileName) === true) {
 				// We are good - there is data so let's go
@@ -168,11 +174,23 @@ function newChart(jsonFileName) {
 							stacked: true,
 							title: {
 								display: true,
-								text: "GHG Emissions Avoided (tonnes of CO2e)"
+								text: "GHG Emissions Avoided (tonnes of CO\u2082e)"
 							},
 							grid: {
 								// The zero line for the Y axis needs to stand out a bit
 								color: ({ tick }) => tick.value === 0 ? "rgba(0, 0, 0, 1)" : "rgba(0, 0, 0, 0.1)"
+							},
+							ticks: {
+								callback: function(value, index, ticks) {
+									// Get the settings for the current view, with a fallback
+									const currentSettings = formatPresets[currentView] || formatPresets.day; // Fallback if currentView isn't matched
+									const formatter = new Intl.NumberFormat('en-US', {
+										notation: 'standard',
+										minimumFractionDigits: currentSettings.min,
+										maximumFractionDigits: currentSettings.max
+									});
+									return formatter.format(value);
+								}
 							}
 						}
 					},
@@ -206,6 +224,21 @@ function newChart(jsonFileName) {
 							mode: 'nearest',
 							intersect: true,
 							callbacks: {
+								label: function(context) {
+									let label = context.dataset.label || '';
+									if (label) {
+										label += ': ';
+									}
+									// Get the settings for the current view, with a fallback
+									const currentSettings = formatPresets[currentView] || formatPresets.day; // Fallback if currentView isn't matched
+									const formatter = new Intl.NumberFormat('en-US', {
+										notation: 'standard',
+										minimumFractionDigits: currentSettings.min,
+										maximumFractionDigits: currentSettings.max
+									});
+									const formattedValue = formatter.format(context.parsed.y);
+									return label + formattedValue + ' tonnes CO\u2082e';
+				                },
 								afterLabel: function (context) {
 									const dataPoint = context.raw;
 									if (dataPoint) { // Check if dataPoint itself is valid/exists
