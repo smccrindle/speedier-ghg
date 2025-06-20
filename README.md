@@ -1,4 +1,4 @@
-# SPEEDIER GHGDASHBOARD
+# SPEEDIER GHG ACCOUNTING AND REPORTING DASHBOARD
 This application allows visitors to view the GHG emission reductions made possible by each of the 
 Distributed Energy Resources (DER) that comprise the SPEEDIER smart grid system, in isolation or 
 in aggregate.
