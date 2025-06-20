@@ -45,10 +45,10 @@ let currentDay = null;
 let datasetVisibility = new Map(); // Stores { "AssetLabel": boolean (true for hidden, false for visible) }
 // Define number formatting presets for each view for Y-axis label and tooltips
 const formatPresets = {
-    "total": { min: 2, max: 3 },
-    "year":  { min: 3, max: 4 },
-    "month": { min: 4, max: 5 },
-    "day":   { min: 5, max: 8 }
+    "total": { max: 2 },   // Example: Total numbers show up to 2 decimal places
+    "year":  { max: 3 },   // Example: Year numbers show up to 3
+    "month": { max: 4 },   // Example: Month numbers show up to 4
+    "day":   { max: 5 }    // Example: Day numbers show up to 5 (to capture fine details)
 };
 
 // Collect interface control elements
@@ -181,13 +181,13 @@ function newChart(jsonFileName) {
 								color: ({ tick }) => tick.value === 0 ? "rgba(0, 0, 0, 1)" : "rgba(0, 0, 0, 0.1)"
 							},
 							ticks: {
-								callback: function(value, index, ticks) {
-									// Get the settings for the current view, with a fallback
-									const currentSettings = formatPresets[currentView] || formatPresets.day; // Fallback if currentView isn't matched
+								callback: function(value) {
+									// Get the maximum digits setting for the current view
+									const currentSettings = formatPresets[currentView] || formatPresets.day;
 									const formatter = new Intl.NumberFormat('en-US', {
 										notation: 'standard',
-										minimumFractionDigits: currentSettings.min,
-										maximumFractionDigits: currentSettings.max
+										minimumFractionDigits: 0, // No forced trailing zeros for alignment
+										maximumFractionDigits: currentSettings.max // Use the view-specific max
 									});
 									return formatter.format(value);
 								}
@@ -229,16 +229,16 @@ function newChart(jsonFileName) {
 									if (label) {
 										label += ': ';
 									}
-									// Get the settings for the current view, with a fallback
-									const currentSettings = formatPresets[currentView] || formatPresets.day; // Fallback if currentView isn't matched
+									// Get the maximum digits setting for the current view
+									const currentSettings = formatPresets[currentView] || formatPresets.day;
 									const formatter = new Intl.NumberFormat('en-US', {
 										notation: 'standard',
-										minimumFractionDigits: currentSettings.min,
-										maximumFractionDigits: currentSettings.max
+										minimumFractionDigits: 0, // <--- Set this to 0: no forced trailing zeros for alignment
+										maximumFractionDigits: currentSettings.max // <--- Use the view-specific max
 									});
 									const formattedValue = formatter.format(context.parsed.y);
 									return label + formattedValue + ' tonnes CO\u2082e';
-				                },
+								},
 								afterLabel: function (context) {
 									const dataPoint = context.raw;
 									if (dataPoint) { // Check if dataPoint itself is valid/exists
