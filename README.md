@@ -6,15 +6,15 @@ in aggregate.
 The dashboard is powered by the amazing Chart.js (https://www.chartjs.org/), which fetches the data 
 from a collection of yearly and monthly JSON files:
 
-JSON files with hourly data for each month
+## JSON files with hourly data for each month
 - files are named in the format GHGIS-YYYY-MM.json
 - powers month and day views
 
-JSON files with monthly data for each year
+## JSON files with monthly data for each year
 - files are named in the format GHGIS-YYYY.json
 - powers year views
 
-JSON file for all time
+## JSON file for all time
 - GHGIS-total.json
 - Powers total view
 
